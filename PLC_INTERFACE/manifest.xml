@@ -1,0 +1,17 @@
+<package>
+  <description brief="PLC_INTERFACE">
+
+     PLC_INTERFACE
+
+  </description>
+  <author>RSD group9</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/PLC_INTERFACE</url>
+  <depend package="std_msgs"/>
+  <depend package="rospy"/>
+  <depend package="roscpp"/>
+
+</package>
+
+

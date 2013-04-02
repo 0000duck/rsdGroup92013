@@ -1,0 +1,17 @@
+<package>
+  <description brief="ROBOT_CONTROL">
+
+     ROBOT_CONTROL
+
+  </description>
+  <author>RSD group9</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/ROBOT_CONTROL</url>
+  <depend package="std_msgs"/>
+  <depend package="rospy"/>
+  <depend package="roscpp"/>
+
+</package>
+
+
