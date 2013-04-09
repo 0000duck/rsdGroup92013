@@ -32,7 +32,9 @@ int main(int argc, char *argv[])
         fprintf(stderr,"ERROR, no port provided\n");
         exit(1);
     }
+	
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
+
     if (sockfd < 0){
        error("ERROR opening socket");
     }
@@ -63,10 +65,10 @@ int main(int argc, char *argv[])
 
     vector<string> list;
 
-    list.push_back("( 0.05 , 0.05 , 0 , 0 , 0 , 0, 1,)");
-    list.push_back("( 0.05 , 0.05 , 0 , 0 , 0 , 0, 2,)");
     list.push_back("( 0.05 , 0.00 , 0 , 0 , 0 , 0, 1,)");
-    list.push_back("( 0.05 , 0.00 , 0 , 0 , 0 , 0, 2,)");
+    list.push_back("( 0.00 , 0.05 , 0 , 0 , 0 , 0.78, 2,)");
+    list.push_back("( -0.05 , 0.00 , 0 , 0 , 0 , 1.57, 1,)");
+    list.push_back("( 0.00 , -0.05 , 0 , 0 , 0 , -0.78, 2,)");
     int ready =1;
 
     while (ros::ok())
@@ -89,7 +91,6 @@ int main(int argc, char *argv[])
 				ready=false;
 			}
     	}
-        cout << "c" << endl;
 
     	n=read(newsockfd,buffer,5);
     	//cout << n << endl;

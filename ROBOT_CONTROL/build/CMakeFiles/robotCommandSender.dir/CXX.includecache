@@ -27,6 +27,8 @@ netinet/in.h
 -
 string
 -
+vector
+-
 
 /opt/ros/groovy/include/XmlRpcDecl.h
 ros/macros.h
