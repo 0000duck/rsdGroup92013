@@ -1,16 +1,14 @@
 <package>
-  <description brief="PLC_INTERFACE">
+  <description brief="ORDER_SYSTEM">
 
-     PLC_INTERFACE
+     ORDER_SYSTEM
 
   </description>
   <author>RSD group9</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/PLC_INTERFACE</url>
-  <depend package="std_msgs"/>
+  <url>http://ros.org/wiki/ORDER_SYSTEM</url>
   <depend package="rospy"/>
-  <depend package="roscpp"/>
   <depend package="MESSAGES"/>
 
 </package>
