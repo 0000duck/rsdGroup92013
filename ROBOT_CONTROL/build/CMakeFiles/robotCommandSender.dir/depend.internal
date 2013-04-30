@@ -21,6 +21,7 @@ CMakeFiles/robotCommandSender.dir/src/robotCommandSender.cpp.o
  /opt/ros/groovy/include/ros/message.h
  /opt/ros/groovy/include/ros/message_event.h
  /opt/ros/groovy/include/ros/message_forward.h
+ /opt/ros/groovy/include/ros/message_operations.h
  /opt/ros/groovy/include/ros/message_traits.h
  /opt/ros/groovy/include/ros/names.h
  /opt/ros/groovy/include/ros/node_handle.h
@@ -56,3 +57,4 @@ CMakeFiles/robotCommandSender.dir/src/robotCommandSender.cpp.o
  /opt/ros/groovy/include/ros/wall_timer.h
  /opt/ros/groovy/include/ros/wall_timer_options.h
  /opt/ros/groovy/include/rosconsole/macros_generated.h
+ /opt/ros/groovy/include/std_msgs/String.h

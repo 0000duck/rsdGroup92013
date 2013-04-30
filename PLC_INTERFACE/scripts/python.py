@@ -5,20 +5,23 @@ from std_msgs.msg import String
 import time
 import serial
 
+
 def callback(data):
 	signal = data.data
+	rospy.loginfo(signal)
 	if(signal=="1"):
 		ser.write("sta")
 	if(signal=="0"):
 		ser.write("sto")
-
+	ser.flush()
+		
 
 def main():
 	rospy.init_node('plcControl', anonymous=True)
-	rospy.Subscriber("readySignal", String, callback)
-	
-	ser = serial.Serial('/dev/ttyUSB0', 19200, timeout=1)
+	rospy.Subscriber("robotReady", String, callback)
 	global ser
+	ser = serial.Serial('/dev/ttyUSB0', 19200, timeout=1)
+	
 	ser.open()
 	ser.isOpen()
 # 	run = 1

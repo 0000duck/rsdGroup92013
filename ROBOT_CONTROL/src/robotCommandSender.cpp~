@@ -1,5 +1,6 @@
 // rosnode to send commands to robot
 #include "ros/ros.h"
+#include "std_msgs/String.h"
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,6 +23,7 @@ int main(int argc, char *argv[])
 {
 	ros::init(argc, argv, "robotCommandSender");
 	ros::NodeHandle h;
+ 	ros::Publisher readyPub = n.advertise<std_msgs::String>("robotReady", 1);
 	
 	int sockfd, newsockfd, portno;
     socklen_t clilen;
@@ -65,18 +67,22 @@ int main(int argc, char *argv[])
 
     vector<string> list;
 
-    list.push_back("( 0.05 , 0.00 , 0 , 0 , 0 , 0, 1,)");
-    list.push_back("( 0.00 , 0.05 , 0 , 0 , 0 , 0, 2,)");
-    list.push_back("( -0.05 , 0.00 , 0 , 0 , 0 , 1.57, 1,)");
-    list.push_back("( 0.00 , -0.05 , 0 , 0 , 0 , 0, 2,)");
+    list.push_back("( 0.027 , 0.086 , 0 , 0 , 0 , 0.67, 1,)");
+    list.push_back("( 0.026 , -0.073 , 0 , 0 , 0 , 0.44, 1,)");
+    list.push_back("( 0.021 , 0.027 , 0 , 0 , 0 , 0.06, 1,)");
+    list.push_back("( -0.029 , 0.054 , 0 , 0 , 0 , 1.89, 1,)");
+    list.push_back("( -0.027 , -0.065 , 0 , 0 , 0 , 1.46 , 1,)");
+    list.push_back("( -0.042 , -0.011 , 0 , 0 , 0 , 0.62 , 1,)");
     int ready =1;
 
     while (ros::ok())
     {
     	if(ready==1){
 			if(!list.empty()){
+				readyPub.publish("0"); // conveyer may not move
 				string temp = list.back();
 				list.pop_back();
+				temp.append("\n");
 				std::cout << temp << std::endl;
 				const char* msg = temp.c_str();
 				//const char* msg ="( 0.05 , 0.05 , 0 , 0 , 0 , 0, 1,)";
@@ -97,6 +103,8 @@ int main(int argc, char *argv[])
     	//cout << buffer << endl;
      	cout << buffer << endl;
     	ready=atoi(buffer);
+
+	readyPub.publish("1"); // conveyer may move
 
 		ros::spinOnce();
 		loop_rate.sleep();
