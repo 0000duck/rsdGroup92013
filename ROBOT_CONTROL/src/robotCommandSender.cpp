@@ -13,10 +13,18 @@
 #include <vector>
 
 using namespace std;
+
+vector<string> list1;
+
 void error(const char *msg)
 {
     perror(msg);
     exit(1);
+}
+
+void configCallback(const std_msgs::String::ConstPtr& msg)
+{
+	list1.push_back(msg->data);
 }
 
 int main(int argc, char *argv[])
@@ -24,6 +32,7 @@ int main(int argc, char *argv[])
 	ros::init(argc, argv, "robotCommandSender");
 	ros::NodeHandle h;
  	ros::Publisher readyPub = h.advertise<std_msgs::String>("robotReady", 1);
+ 	ros::Subscriber sub = h.subscribe("newConfig", 10, configCallback);
 	
 	int sockfd, newsockfd, portno;
     socklen_t clilen;
@@ -65,58 +74,47 @@ int main(int argc, char *argv[])
 
     ros::Rate loop_rate(10);
 
-    vector<string> list;
 
-   // list.push_back("( 0.027 , 0.086 , 0 , 0 , 0 , 0.67, 1,)");
-    //list.push_back("( 0.026 , -0.073 , 0 , 0 , 0 , 0.44, 1,)");
-    list.push_back("( 0.021 , 0.027 , 0 , 0 , 0 , 0.06, 1,)");
-    list.push_back("( -0.029 , 0.054 , 0 , 0 , 0 , 1.89, 1,)");
-    list.push_back("( -0.027 , -0.065 , 0 , 0 , 0 , 1.46 , 1,)");
-    list.push_back("( -0.042 , -0.011 , 0 , 0 , 0 , 0.62 , 1,)");
-    bool ready =true;
+
+    //list.push_back("( 0.032 , -0.032 , 0 , 0 , 0 , 0.09, 1,)");
+    //list.push_back("( 0.018 , 0.053 , 0 , 0 , 0 , -0.13, 1,)");
+    //list1.push_back("( 0.022 , -0.007 , 0 , 0 , 0 , 1.28, 1,)");
+    //list1.push_back("( 0.011 , 0.053 , 0 , 0 , 0 , 1.54, 1,)");
+    //list1.push_back("( -0.028 , -0.03 , 0 , 0 , 0 , 0.2 , 1,)");
+    list1.push_back("( -0.035 , 0.058 , 0 , 0 , 0 , -0.4 , 1,)");
+    int ready = 1;
 	std_msgs::String message;
 	message.data="0";
 	readyPub.publish(message);
 
     while (ros::ok())
     {
-		if(!list.empty()){
-			if(ready==true){
+		if(!list1.empty()){
+			if(ready==1){
 				message.data="0"; // conveyer may not move
-				ROS_INFO("%s", message.data.c_str());
+				//ROS_INFO("%s", message.data.c_str());
 				readyPub.publish(message);
-				string temp = list.back();
-				list.pop_back();
+				string temp = list1.back();
+				list1.pop_back();
 				temp.append("\n");
-				//std::cout << temp << std::endl;
 				const char* msg = temp.c_str();
 				//const char* msg ="( 0.05 , 0.05 , 0 , 0 , 0 , 0, 1,)";
 				n = write(newsockfd,msg,strlen(msg));
-				// const char* msg ="( -0.431 , -0.607 , 0.066 , 1.06 , -2.9 , 0.03 )";
 
 				if (n < 0) error("ERROR writing to socket");
 
-				//sleep(2);
-				//const char* msg1 ="( 0.05 , 0.05 , 0 , 0 , 0 , 0, 2)";
-				//n = write(newsockfd,msg1,strlen(msg1));
-				ready=false;
+				ready=0;
 			}
-		   	else{
-
-				n=read(newsockfd,buffer,5);
-				//cout << n << endl;
-				//cout << buffer << endl;
-				//cout << buffer << endl;
-				ready=atoi(buffer);
-		   	}
     	}
 		else{
-			message.data="1"; // conveyer may move
-			ROS_INFO("%s", message.data.c_str());
-			readyPub.publish(message);
+			if(ready==2){
+				message.data="1"; // conveyer may move
+				readyPub.publish(message);
+			}
     	}
+		n=read(newsockfd,buffer,5);
 
-
+		ready=atoi(buffer);
 
 		ros::spinOnce();
 		loop_rate.sleep();
