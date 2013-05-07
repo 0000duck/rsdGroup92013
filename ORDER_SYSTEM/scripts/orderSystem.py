@@ -18,12 +18,10 @@ import random
 ################################################################################################### 
 IP = '192.168.10.100'
 port = 80
-visBricks = [0,0,0] 
 detectedBricks = [1,4,1]        # Red, Blue, Yellow (bricks)
 base_url = 'http://192.168.10.100/'
-init = True
-bestOrder_dict = {'orderName':0,'orderDone':False, 'bricks':0,'ticket':0,'redTotal':0,'blueTotal':0,'yellowTotal':0,'redPicked':0,'bluePicked':0,'yellowPicked':0,'redNeeded':0,'blueNeeded':0,'yellowNeeded':0} 
-
+bestOrder_dict = {0: {'orderName':0,'orderState':0,'orderDone':False, 'bricks':0,'ticket':0,'redTotal':0,'blueTotal':0,'yellowTotal':0,'redPicked':0,'bluePicked':0,'yellowPicked':0,'redNeeded':0,'blueNeeded':0,'yellowNeeded':0},        1: {'orderName':0,'orderDone':False, 'bricks':0,'ticket':0,'redTotal':0,'blueTotal':0,'yellowTotal':0,'redPicked':0,'bluePicked':0,'yellowPicked':0,'redNeeded':0,'blueNeeded':0,'yellowNeeded':0}}
+slider = 1
 ################################################################################################### 
 #------------------------------------- Helper functions ------------------------------------------- 
 ################################################################################################### 
@@ -34,7 +32,23 @@ colors = enum(RED=0, BLUE=1, YELLOW=2)
  
 def serverPath(path):
     return 'orders/' + path  
-  
+
+def printOrderSpecs(order):
+    print "Name: " + str(order['orderName'])
+    print "Done: " + str(order['orderDone'])
+    print "Ticket: " + str(order['ticket']) 
+    print "Red total: " + str(order['redTotal']) 
+    print "Blue total: " + str(order['blueTotal'])
+    print "Yellow total: " + str(order['yellowTotal'])
+    print "Red picked: " + str(order['redPicked'])
+    print "Blue picked: " + str(order['bluePicked']) 
+    print "Yellow picked: " + str(order['yellowPicked'])
+
+
+def printSliderSpecs(slider):
+    print "Busy: " + str(slider['busy'])
+    print "Order No: " + str(slider['order#'])
+    print "Ticket: " + str(slider['ticket'])  
 ################################################################################################### 
 #------------------------------------ Parsing functions ------------------------------------------- 
 ################################################################################################### 
@@ -94,8 +108,7 @@ def getOrders(numberOfOrders,detectedBricks):
             bestOrder_dict['orderDone'] = True
             return bestOrder_dict
         else:
-            print "bestCounter init: " + str(bestCounter)
-            
+           
             if(bricks[colors.RED] != 0):
                 diffRed = bricks[colors.RED]-detectedBricks[colors.RED]
                 print "diffRed: " + str(diffRed) 
@@ -104,9 +117,7 @@ def getOrders(numberOfOrders,detectedBricks):
                     bestCounter += (detectedBricks[colors.RED]-diffRed)
                 else:
                     bestCounter += bricks[colors.RED]-diffRed
-                
-            print "Count after Red: " + str(bestCounter)   
-           
+
             if(bricks[colors.BLUE] != 0):  
                 diffBlue = bricks[colors.BLUE]-detectedBricks[colors.BLUE]
                 print "diffBlue: " + str(diffBlue)
@@ -115,8 +126,6 @@ def getOrders(numberOfOrders,detectedBricks):
                     bestCounter += (detectedBricks[colors.BLUE]-diffBlue)
                 else:
                     bestCounter += bricks[colors.BLUE]-diffBlue
-                
-            print "Count after Blue: " + str(bestCounter)   
               
             if(bricks[colors.YELLOW] != 0):    
                 diffYellow = bricks[colors.YELLOW]-detectedBricks[colors.YELLOW]
@@ -299,15 +308,28 @@ def main():
     rospy.init_node('orderSystem')
     listReceived = True
     requestedOrders = '5'
-    state = "IDLE"
+    global bestOrder
+    global slider
+    global sliderStatus
+    sliderStatus = dict(bestOrder_dict)
+    bestOrder = dict(bestOrder_dict)
+    bestOrder[0]['orderState'] = "IDLE"
+    bestOrder[1]['orderState'] = "IDLE"
     while not rospy.is_shutdown():
-        global bestOrder
+        slider = not slider
         global detectedBricks
-        if (state=="IDLE"):            # Getting order
+        print '\n ################################ \t Slider 0 \t \t ##########################'
+        printOrderSpecs(sliderStatus[0])
+        print '\n ################################ \t Slider 1 \t \t ##########################'
+        printOrderSpecs(sliderStatus[1])
+################################################################################################### 
+#--------------------------------------- Idle state -----------------------------------------------
+###################################################################################################         
+        if (bestOrder[slider]['orderState'] == "IDLE"):
             if(listReceived == True):
             
                 print '\n ################################ \t Detected bricks [RED BLUE YELLOW]: [' +  str(detectedBricks[colors.RED]) + ' ' + str(detectedBricks[colors.BLUE]) + ' ' + str(detectedBricks[colors.YELLOW]) + '] \t \t ##########################'
-                state="GET_ORDER"
+                bestOrder[slider]['orderState'] = "GET_ORDER"
                 
                 rospy.sleep(1.0)
             else:
@@ -315,57 +337,57 @@ def main():
                 listReceived=True       # Simulating Vision input
                 rospy.sleep(3.0)
                 
-        if(state=="GET_ORDER"):
-            bestOrder = getOrders(requestedOrders, detectedBricks)   
-            print "Name: " + str(bestOrder['orderName'])
-            print "Done: " + str(bestOrder['orderDone'])
-            print "Ticket: " + str(bestOrder['ticket']) 
-            print "Red total: " + str(bestOrder['redTotal']) 
-            print "Blue total: " + str(bestOrder['blueTotal'])
-            print "Yellow total: " + str(bestOrder['yellowTotal'])
-            print "Red picked: " + str(bestOrder['redPicked'])
-            print "Blue picked: " + str(bestOrder['bluePicked']) 
-            print "Yellow picked: " + str(bestOrder['yellowPicked'])
+################################################################################################### 
+#--------------------------------------- Get order state ------------------------------------------ 
+###################################################################################################                
+        if(bestOrder[slider]['orderState'] =="GET_ORDER"):
+            bestOrder[slider] = getOrders(requestedOrders, detectedBricks)   
+            printOrderSpecs(bestOrder[slider])
+            sliderStatus[slider] = bestOrder[slider]
             
+            publish(bestOrder[slider])
             rospy.sleep(1.0)
                 
-        if bestOrder['orderDone'] == True:
-            state="ORDER_DONE"
+        if bestOrder[slider]['orderDone'] == True:
+            bestOrder[slider]['orderState'] = "ORDER_DONE"
         else:
-            state="ORDER_NOT_DONE"
+            bestOrder[slider]['orderState'] = "ORDER_NOT_DONE"
             
-        if(state=="ORDER_DONE"):
-            #deleteOrder(bestOrder['orderName'],bestOrder['ticket'] )
-            logMsg('COMPLETED', bestOrder['orderName'])
+################################################################################################### 
+#--------------------------------------- Order done state ----------------------------------------- 
+###################################################################################################              
+        if(bestOrder[slider]['orderState'] =="ORDER_DONE"):
+            #deleteOrder(bestOrder[slider]['orderName'],bestOrder[slider]['ticket'] )
+            sliderStatus = dict(bestOrder_dict)     # Clearing the slider status (the slider is now available)
+            logMsg('COMPLETED', bestOrder[slider]['orderName'])
             # Signal Vision system that the order is done. Wait for new detectedBricks
-            bestOrder['orderDone'] = False
-            state="IDLE"
+            bestOrder[slider]['orderDone'] = False
+            bestOrder[slider]['orderState'] = "IDLE"
             
             rospy.sleep(1.0)
-        
-        if(state=="ORDER_NOT_DONE"):        
+            
+################################################################################################### 
+#--------------------------------------- Order not done state ------------------------------------- 
+###################################################################################################        
+        if(bestOrder[slider]['orderState'] == "ORDER_NOT_DONE"):        
             detectedBricks = [random.randrange(0, 5),random.randrange(0, 5),random.randrange(0, 5)]
             print '\n ################################ \t New detected bricks [RED BLUE YELLOW]: [ ' + str(detectedBricks[0]), str(detectedBricks[1]), str(detectedBricks[2]) + '] \t \t ##########################'
-            bestOrder = getSpecificOrder(bestOrder,detectedBricks)
+            bestOrder[slider] = getSpecificOrder(bestOrder[slider],detectedBricks)
             
-            print "Name: " + str(bestOrder['orderName'])
-            print "Done: " + str(bestOrder['orderDone']) 
-            print "Ticket: " + str(bestOrder['ticket']) 
-            print "Red total: " + str(bestOrder['redTotal']) 
-            print "Blue total: " + str(bestOrder['blueTotal']) 
-            print "Yellow total: " + str(bestOrder['yellowTotal'])
-            print "Red picked: " + str(bestOrder['redPicked']) 
-            print "Blue picked: " + str(bestOrder['bluePicked'])
-            print "Yellow picked: " + str(bestOrder['yellowPicked']) 
+            printOrderSpecs(bestOrder[slider])          
                 
-            publish(bestOrder)
+            publish(bestOrder[slider])
             
-            if bestOrder['orderDone'] == True:
-                state="ORDER_DONE"
+            if bestOrder[slider]['orderDone'] == True:
+                bestOrder[slider]['orderState'] = "ORDER_DONE"
             else:
-                state="ORDER_NOT_DONE"
+                bestOrder[slider]['orderState'] = "ORDER_NOT_DONE"
                   
             rospy.sleep(1.0)
+
+################################################################################################### 
+#--------------------------------------- ROS topic I/O -------------------------------------------- 
+###################################################################################################
 
 if __name__ == '__main__':
    pub = rospy.Publisher('chosenOrder', order)
