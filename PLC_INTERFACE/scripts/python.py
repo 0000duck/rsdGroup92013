@@ -12,6 +12,8 @@ visTemp = "0"
 def write():
 	if((robTemp=="1") and (visTemp=="1")):
 		ser.write("sta")
+		time.sleep(1.75)
+		ser.write("sto")
 	if((robTemp=="0") and (visTemp=="0")):
 		ser.write("sto")
 

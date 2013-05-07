@@ -25,6 +25,7 @@ void error(const char *msg)
 void configCallback(const std_msgs::String::ConstPtr& msg)
 {
 	list1.push_back(msg->data);
+	cout << "rec" << list1.back() << endl;
 }
 
 int main(int argc, char *argv[])
@@ -81,7 +82,7 @@ int main(int argc, char *argv[])
     //list1.push_back("( 0.022 , -0.007 , 0 , 0 , 0 , 1.28, 1,)");
     //list1.push_back("( 0.011 , 0.053 , 0 , 0 , 0 , 1.54, 1,)");
     //list1.push_back("( -0.028 , -0.03 , 0 , 0 , 0 , 0.2 , 1,)");
-    list1.push_back("( -0.035 , 0.058 , 0 , 0 , 0 , -0.4 , 1,)");
+    //list1.push_back("( -0.035 , 0.058 , 0 , 0 , 0 , -0.4 , 1,)");
     int ready = 1;
 	std_msgs::String message;
 	message.data="0";
@@ -93,7 +94,7 @@ int main(int argc, char *argv[])
 			if(ready==1){
 				message.data="0"; // conveyer may not move
 				//ROS_INFO("%s", message.data.c_str());
-				readyPub.publish(message);
+				//readyPub.publish(message);
 				string temp = list1.back();
 				list1.pop_back();
 				temp.append("\n");
@@ -109,7 +110,7 @@ int main(int argc, char *argv[])
 		else{
 			if(ready==2){
 				message.data="1"; // conveyer may move
-				readyPub.publish(message);
+				//readyPub.publish(message);
 			}
     	}
 		n=read(newsockfd,buffer,5);
