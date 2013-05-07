@@ -4,6 +4,8 @@ import rospy
 from std_msgs.msg import String
 import time
 import serial
+
+
 robTemp = "0"
 visTemp = "0"
 
