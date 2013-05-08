@@ -15,6 +15,7 @@
 using namespace std;
 
 vector<string> list1;
+int conveyerStopped = 1;
 
 void error(const char *msg)
 {
@@ -28,12 +29,18 @@ void configCallback(const std_msgs::String::ConstPtr& msg)
 	cout << "rec" << list1.back() << endl;
 }
 
+void convStopCallback(const std_msgs::String::ConstPtr& msg)
+{
+	conveyerStopped=atoi(msg->data.c_str());
+}
+
 int main(int argc, char *argv[])
 {
 	ros::init(argc, argv, "robotCommandSender");
 	ros::NodeHandle h;
  	ros::Publisher readyPub = h.advertise<std_msgs::String>("robotReady", 1);
  	ros::Subscriber sub = h.subscribe("newConfig", 10, configCallback);
+ 	ros::Subscriber convStopSub = h.subscribe("conveyerStopped", 10, convStopCallback);
 	
 	int sockfd, newsockfd, portno;
     socklen_t clilen;
@@ -83,39 +90,44 @@ int main(int argc, char *argv[])
     //list1.push_back("( 0.011 , 0.053 , 0 , 0 , 0 , 1.54, 1,)");
     //list1.push_back("( -0.028 , -0.03 , 0 , 0 , 0 , 0.2 , 1,)");
     //list1.push_back("( -0.035 , 0.058 , 0 , 0 , 0 , -0.4 , 1,)");
-    int ready = 1;
+    int ready = 2;
 	std_msgs::String message;
-	message.data="0";
-	readyPub.publish(message);
+//	message.data="0";
+	///readyPub.publish(message);
 
     while (ros::ok())
     {
-		if(!list1.empty()){
-			if(ready==1){
-				message.data="0"; // conveyer may not move
-				//ROS_INFO("%s", message.data.c_str());
-				//readyPub.publish(message);
-				string temp = list1.back();
-				list1.pop_back();
-				temp.append("\n");
-				const char* msg = temp.c_str();
-				//const char* msg ="( 0.05 , 0.05 , 0 , 0 , 0 , 0, 1,)";
-				n = write(newsockfd,msg,strlen(msg));
+    	if(conveyerStopped==1){
+			if(!list1.empty()){
+				if(ready==1){
+					cout << "write" << endl;
+					message.data="0"; // conveyer may not move
+					//ROS_INFO("%s", message.data.c_str());
+					readyPub.publish(message);
+					string temp = list1.back();
+					list1.pop_back();
+					temp.append("\n");
+					const char* msg = temp.c_str();
+					//const char* msg ="( 0.05 , 0.05 , 0 , 0 , 0 , 0, 1,)";
+					n = write(newsockfd,msg,strlen(msg));
 
-				if (n < 0) error("ERROR writing to socket");
+					if (n < 0) error("ERROR writing to socket");
 
-				ready=0;
+					ready=0;
+				}
 			}
-    	}
-		else{
-			if(ready==2){
-				message.data="1"; // conveyer may move
-				//readyPub.publish(message);
+			else{
+				conveyerStopped=0;
+				if(ready==2){
+					message.data="1"; // conveyer may move
+					readyPub.publish(message);
+				}
 			}
     	}
 		n=read(newsockfd,buffer,5);
 
 		ready=atoi(buffer);
+		cout << "GUIUHJHIOFGYIOG " << ready << endl;
 
 		ros::spinOnce();
 		loop_rate.sleep();

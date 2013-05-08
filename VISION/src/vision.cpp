@@ -23,7 +23,7 @@
 using namespace std;
 using namespace cv;
 
-bool lala=true;
+int conveyerStopped = 0;
 
 vector<string> list1;
 
@@ -122,7 +122,7 @@ string constructCommand(double xPos, double yPos, double angle, int slider){
 	return temp;
 }
 
-void getBricks(Mat& imgEdge, Mat& imgROI, ros::Publisher configPub, ros::Publisher seenPub){
+void getBricks(Mat& imgEdge, Mat& imgROI, ros::Publisher configPub, ros::Publisher seenPub, ros::Publisher readyPub){
 		Mat imgCon;
 
 	//Vectors for storing the connected components in:
@@ -211,15 +211,22 @@ void getBricks(Mat& imgEdge, Mat& imgROI, ros::Publisher configPub, ros::Publish
 		seenPub.publish(seen);
 
 
-		if(lala==true){ //test stuffMESSAGES/order
-			while(!list1.empty()){
-				lala=false;
-				std_msgs::String message;
-				message.data=list1.back();
-				configPub.publish(message);
-				list1.pop_back();
-			}
+
+		while(!list1.empty()){
+			std_msgs::String message;
+			message.data=list1.back();
+			configPub.publish(message);
+			list1.pop_back();
 		}
+		std_msgs::String message;
+		message.data="1";
+		readyPub.publish(message);
+		conveyerStopped=0;
+}
+
+void robRCallback(const std_msgs::String::ConstPtr& msg)
+{
+	conveyerStopped=atoi(msg->data.c_str());
 }
 
 
@@ -229,6 +236,9 @@ int main(int argc, char *argv[])
 	ros::NodeHandle h;
 	ros::Publisher configPub = h.advertise<std_msgs::String>("newConfig", 20);
 	ros::Publisher seenPub = h.advertise<MESSAGES::order>("visDetected", 20);
+ 	ros::Publisher readyPub = h.advertise<std_msgs::String>("visReady", 1);
+ 	ros::Subscriber robRSub = h.subscribe("robotReady", 10, robRCallback);
+
 	//ros::Subscriber sub = h.subscribe("newConfig", 10, configCallback);
 
 	Mat src, dst, imgROI, hsv, gray, imgEdge;
@@ -257,33 +267,37 @@ int main(int argc, char *argv[])
 		src = imread("lego.png",1); //Use saved test image
 	}*/
 	//imshow("Input image", src); //Show input imag from either camera or file
+
 	while(ros::ok()){
-		src = imread("lego.png",1); //Use saved test image
-		//Extracting the region of interest ROI
-		imgROI = src.clone(); //Take a copy of the input
+		if(conveyerStopped==1){
+			src = imread("lego.png",1); //Use saved test image
+			//Extracting the region of interest ROI
+			imgROI = src.clone(); //Take a copy of the input
 
-		//Convert to gray scale
-		cvtColor(imgROI,hsv,CV_BGR2HSV); //Convert to HSV
+			//Convert to gray scale
+			cvtColor(imgROI,hsv,CV_BGR2HSV); //Convert to HSV
+			std_msgs::String message;
+			message.data="0";
+			readyPub.publish(message);
+			vector<Mat> HSV_planes;
+			split(hsv, HSV_planes);
+			gray = HSV_planes[2];
 
-		vector<Mat> HSV_planes;
-		split(hsv, HSV_planes);
-		gray = HSV_planes[2];
+			//afjklasghogtjilsagahilæg =findMarkerLocation(gray);
 
-		//afjklasghogtjilsagahilæg =findMarkerLocation(gray);
+			//Cut out the part of the image with the circle
+			int sizeLeft = 0;
+			int sizeRight = 1149;
+			gray = gray(Range(0, gray.rows), Range(sizeLeft, sizeRight)); //Define the area of the ROI image
+			cout << "0" << endl;
 
-		//Cut out the part of the image with the circle
-		int sizeLeft = 0;
-		int sizeRight = 1149;
-		gray = gray(Range(0, gray.rows), Range(sizeLeft, sizeRight)); //Define the area of the ROI image
-		cout << "0" << endl;
-
-		Mat imgEdge;
-		imgEdge = detectEdges(gray, imgEdge);
-		getBricks(imgEdge,imgROI, configPub, seenPub);
+			Mat imgEdge;
+			imgEdge = detectEdges(gray, imgEdge);
+			getBricks(imgEdge,imgROI, configPub, seenPub, readyPub);
+		}
 
 		ros::spinOnce();
 		loop_rate.sleep();
-
 	}
 
 

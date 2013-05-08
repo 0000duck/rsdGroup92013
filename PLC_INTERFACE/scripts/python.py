@@ -12,8 +12,16 @@ visTemp = "0"
 def write():
 	if((robTemp=="1") and (visTemp=="1")):
 		ser.write("sta")
-		time.sleep(0.81)
+		pub_msg = String()
+   		pub_msg.data = "0"
+   		global pub
+   		pub.publish(pub_msg)
+		time.sleep(2*0.81)
 		ser.write("sto")
+		pub_msg = String()
+   		pub_msg.data = "1"
+   		pub.publish(pub_msg)
+		
 	if((robTemp=="0") and (visTemp=="0")):
 		ser.write("sto")
 
@@ -36,6 +44,7 @@ def main():
 	rospy.init_node('plcControl', anonymous=True)
 	rospy.Subscriber("robotReady", String, robCallback)
 	rospy.Subscriber("visReady", String, visCallback)
+	
 	global ser
 	ser = serial.Serial('/dev/ttyUSB0', 19200, timeout=1)
 	
@@ -67,4 +76,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+	pub = rospy.Publisher("conveyerStopped", String)
+	main()
