@@ -19,10 +19,10 @@ import warnings
 ################################################################################################### 
 IP = '192.168.10.100'
 port = 80
-detectedBricks = [0,0,0]        # Red, Blue, Yellow (bricks)
+detectedBricks = [2,2,2]        # Red, Blue, Yellow (bricks)
 base_url = 'http://192.168.10.100/'
-bestOrder_dict = {0: {'orderName':0,'orderState':0,'orderDone':True, 'bricks':0,'ticket':0,'redTotal':0,'blueTotal':0,'yellowTotal':0,'redPicked':0,'bluePicked':0,'yellowPicked':0,'redNeeded':0,'blueNeeded':0,'yellowNeeded':0},        1: {'orderName':0,'orderDone':True, 'bricks':0,'ticket':0,'redTotal':0,'blueTotal':0,'yellowTotal':0,'redPicked':0,'bluePicked':0,'yellowPicked':0,'redNeeded':0,'blueNeeded':0,'yellowNeeded':0}}
-slider = 1
+bestOrder_dict = {0: {'orderName':'None','orderState':0,'slider':False,'orderDone':True, 'bricks':0,'ticket':0,'redTotal':0,'blueTotal':0,'yellowTotal':0,'redPicked':0,'bluePicked':0,'yellowPicked':0,'redNeeded':0,'blueNeeded':0,'yellowNeeded':0},        1: {'orderName':'None','orderState':0,'slider':False,'orderDone':True, 'bricks':0,'ticket':0,'redTotal':0,'blueTotal':0,'yellowTotal':0,'redPicked':0,'bluePicked':0,'yellowPicked':0,'redNeeded':0,'blueNeeded':0,'yellowNeeded':0}}
+slider = True
 ################################################################################################### 
 #------------------------------------- Helper functions ------------------------------------------- 
 ################################################################################################### 
@@ -70,7 +70,7 @@ def parseOrderReceipt(data):
 #--------------------------------------- Take order functions ------------------------------------- 
 ################################################################################################### 
             
-def getOrders(numberOfOrders,detectedBricks):
+def getOrders(numberOfOrders,detectedBricks,slider):
     print '\n ################################ \t Requesting a list of ' + numberOfOrders + ' orders \t \t \t \t ##########################'
     #===========================================================================
     # try:
@@ -80,9 +80,9 @@ def getOrders(numberOfOrders,detectedBricks):
     #     if(orderList.statuscode != 200):
     #         print 'HTTP error: Bad request'
     #     return 0
-    # except Exception, err:
-    #     print "ERROR: Connection error (you're on eduroam, you fool!)"
-    #     sys.exit()
+    #     except Exception, err:
+    #         print "ERROR: Connection error (you're on eduroam, you fool!)"
+    #         sys.exit()
     #===========================================================================
     orderNames = parseorderList(orderList.content)
     bricks = [0,0,0]
@@ -93,17 +93,18 @@ def getOrders(numberOfOrders,detectedBricks):
         bricks[colors.RED] = int(parseorderDetails(orderDetails.content,'red'))
         bricks[colors.BLUE] = int(parseorderDetails(orderDetails.content,'blue'))
         bricks[colors.YELLOW] = int(parseorderDetails(orderDetails.content,'yellow'))
+        bestOrder_dict['orderName'] = orderNames[x]
         print '\n ################################ \t Order ' + orderNames[x] + ' requires [RED BLUE YELLOW]: ' + '[' + str(bricks[colors.RED]) + ' ' + str(bricks[colors.BLUE]) + ' ' + str(bricks[colors.YELLOW]) + '] \t ##########################'
         #print orderDetails.content
         
+        bestOrder_dict['redTotal'] = bricks[colors.RED]
+        bestOrder_dict['blueTotal'] = bricks[colors.BLUE]
+        bestOrder_dict['yellowTotal'] = bricks[colors.YELLOW]
+        
         if((bricks[colors.RED] <= detectedBricks[colors.RED]) & (bricks[colors.BLUE] <= detectedBricks[colors.BLUE]) & (bricks[colors.YELLOW] <= detectedBricks[colors.YELLOW])):    # Every need can be fulfilled
-            bestOrder_dict['redTotal'] = bricks[colors.RED]
-            bestOrder_dict['blueTotal'] = bricks[colors.BLUE]
-            bestOrder_dict['yellowTotal'] = bricks[colors.YELLOW]
             bestOrder_dict['redPicked'] = bestOrder_dict['redTotal']
             bestOrder_dict['bluePicked'] = bestOrder_dict['blueTotal']
             bestOrder_dict['yellowPicked'] = bestOrder_dict['yellowTotal']
-            bestOrder_dict['orderName'] = orderNames[x]
             
             bestOrder_dict['redNeeded'] = bestOrder_dict['redTotal']-bestOrder_dict['redPicked']
             bestOrder_dict['blueNeeded'] = bestOrder_dict['blueTotal']-bestOrder_dict['bluePicked']
@@ -113,41 +114,36 @@ def getOrders(numberOfOrders,detectedBricks):
             bestOrder_dict['ticket'] = parseOrderReceipt(orderReceipt.content)
             print '\n ################################ \t An optimal order was found: ' + orderNames[x] + ' with ticket: ' + bestOrder_dict['ticket'] + '\t ##################'
             bestOrder_dict['orderDone'] = True
+            bestOrder_dict['slider'] = slider
             return bestOrder_dict
         else:
            
-            if(bricks[colors.RED] != 0):
-                diffRed = bricks[colors.RED]-detectedBricks[colors.RED]
-                if(diffRed < 0):
-                    diffRed = abs(diffRed)
-                    bestCounter += (detectedBricks[colors.RED]-diffRed)
-                else:
-                    bestCounter += bricks[colors.RED]-diffRed
+            diffRed = bricks[colors.RED]-detectedBricks[colors.RED]
+            if(diffRed < 0):
+                diffRed = abs(diffRed)
+                bestCounter += (detectedBricks[colors.RED]-diffRed)
+            else:
+                bestCounter += bricks[colors.RED]-diffRed
 
-            if(bricks[colors.BLUE] != 0):  
-                diffBlue = bricks[colors.BLUE]-detectedBricks[colors.BLUE]
-                if(diffBlue < 0):
-                    diffBlue = abs(diffBlue)
-                    bestCounter += (detectedBricks[colors.BLUE]-diffBlue)
-                else:
-                    bestCounter += bricks[colors.BLUE]-diffBlue
-              
-            if(bricks[colors.YELLOW] != 0):    
-                diffYellow = bricks[colors.YELLOW]-detectedBricks[colors.YELLOW]
-                if(diffYellow < 0):
-                    diffYellow = abs(diffYellow)
-                    bestCounter += (detectedBricks[colors.YELLOW]-diffYellow)
-                else:
-                    bestCounter += bricks[colors.YELLOW]-diffYellow
-             
-            #print "bestCounter: " + str(bestCounter)
-            if(bestCounter > bestOrder_dict['bricks'] and sliderStatus[int(slider)]['orderDone'] == True): # FIX THIS!!
+            diffBlue = bricks[colors.BLUE]-detectedBricks[colors.BLUE]
+            if(diffBlue < 0):
+                diffBlue = abs(diffBlue)
+                bestCounter += (detectedBricks[colors.BLUE]-diffBlue)
+            else:
+                bestCounter += bricks[colors.BLUE]-diffBlue
+           
+            diffYellow = bricks[colors.YELLOW]-detectedBricks[colors.YELLOW]
+            if(diffYellow < 0):
+                diffYellow = abs(diffYellow)
+                bestCounter += (detectedBricks[colors.YELLOW]-diffYellow)
+            else:
+                bestCounter += bricks[colors.YELLOW]-diffYellow
+            
+            print 'bestCounter: ' + str(bestCounter)
+            print 'bricks: ' + str(bestOrder_dict['bricks'])           
+            if(bestCounter > bestOrder_dict['bricks']):
                 print 'Slider: ' + str(int(slider)) + 'SliderStatus: ' + str(sliderStatus[int(slider)]['orderDone'])
                 bestOrder_dict['bricks'] = bestCounter
-                bestOrder_dict['redTotal'] = bricks[colors.RED]
-                bestOrder_dict['blueTotal'] = bricks[colors.BLUE]
-                bestOrder_dict['yellowTotal'] = bricks[colors.YELLOW]
-                bestOrder_dict['orderName'] = orderNames[x]
                 
                 if(bestOrder_dict['redTotal'] <= detectedBricks[colors.RED]):
                     bestOrder_dict['redPicked'] = bricks[colors.RED]
@@ -162,17 +158,18 @@ def getOrders(numberOfOrders,detectedBricks):
                 if(bestOrder_dict['yellowTotal'] <= detectedBricks[colors.YELLOW]):
                     bestOrder_dict['yellowPicked'] = bricks[colors.YELLOW]
                 if(bestOrder_dict['yellowTotal'] > detectedBricks[colors.YELLOW]):
-                    bestOrder_dict['yellowPicked'] = detectedBricks[colors.YELLOW]    
-                
-            bestOrder_dict['redNeeded'] = bestOrder_dict['redTotal']-bestOrder_dict['redPicked']
-            bestOrder_dict['blueNeeded'] = bestOrder_dict['blueTotal']-bestOrder_dict['bluePicked']
-            bestOrder_dict['yellowNeeded'] = bestOrder_dict['yellowTotal']-bestOrder_dict['yellowPicked']
-                 
+                    bestOrder_dict['yellowPicked'] = detectedBricks[colors.YELLOW]
+                  
+                bestOrder_dict['redNeeded'] = bestOrder_dict['redTotal']-bestOrder_dict['redPicked']    
+                bestOrder_dict['blueNeeded'] = bestOrder_dict['blueTotal']-bestOrder_dict['bluePicked']
+                bestOrder_dict['yellowNeeded'] = bestOrder_dict['yellowTotal']-bestOrder_dict['yellowPicked']    
+    
     orderReceipt = requests.put(base_url + serverPath(bestOrder_dict['orderName']))
     print orderReceipt.url
     print orderReceipt.content
     bestOrder_dict['ticket'] = parseOrderReceipt(orderReceipt.content)
     bestOrder_dict['orderDone'] = False
+    bestOrder_dict['slider]'] = slider
     print '\n ################################ \t An order was found: ' + str(bestOrder_dict['orderName']) + ' with ticket: ' + str(bestOrder_dict['ticket']) + '\t ##########################'
     return bestOrder_dict
 
@@ -322,8 +319,12 @@ def main():
     bestOrder[1]['orderState'] = "IDLE"
     rospy.sleep(2.0)
     while not rospy.is_shutdown():
-        slider = not slider
         global detectedBricks
+        while (detectedBricks[colors.RED]== 0 and detectedBricks[colors.BLUE]== 0 and detectedBricks[colors.YELLOW]== 0):
+            print  '\n ################################ \t Waiting for detected bricks \t \t ##########################'
+            rospy.sleep(3.0)
+ 
+        slider = not slider
         print bestOrder[0]['orderState']
         print bestOrder[1]['orderState']
 ################################################################################################### 
@@ -345,7 +346,7 @@ def main():
 #--------------------------------------- Get order state ------------------------------------------ 
 ###################################################################################################                
         if(bestOrder[slider]['orderState'] =="GET_ORDER"):
-            bestOrder[slider] = getOrders(requestedOrders, detectedBricks)   
+            bestOrder[slider] = getOrders(requestedOrders, detectedBricks,slider)   
             printOrderSpecs(bestOrder[slider])
             sliderStatus[slider] = bestOrder[slider]
             
@@ -360,7 +361,7 @@ def main():
 ################################################################################################### 
 #--------------------------------------- Order done state ----------------------------------------- 
 ###################################################################################################              
-        if(bestOrder[slider]['orderState'] =="ORDER_DONE"):
+        if(bestOrder[slider]['orderState'] =="ORDER_DONE" and detectedBricks[colors.RED]!= 0 and detectedBricks[colors.BLUE]!= 0 and detectedBricks[colors.YELLOW]!= 0):
             #deleteOrder(bestOrder[slider]['orderName'],bestOrder[slider]['ticket'] )
             sliderStatus = dict(bestOrder_dict)     # Clearing the slider status (the slider is now available)
             logMsg('COMPLETED', bestOrder[slider]['orderName'])
@@ -376,8 +377,10 @@ def main():
         if(bestOrder[slider]['orderState'] == "ORDER_NOT_DONE"):        
             #detectedBricks = [random.randrange(0, 5),random.randrange(0, 5),random.randrange(0, 5)]
             print '\n ################################ \t New detected bricks [RED BLUE YELLOW]: [ ' + str(detectedBricks[0]), str(detectedBricks[1]), str(detectedBricks[2]) + '] \t \t ##########################'
-            bestOrder[slider] = getSpecificOrder(bestOrder[slider],detectedBricks)
             
+            bestOrder[slider] = getSpecificOrder(bestOrder[slider],detectedBricks)
+
+                
             printOrderSpecs(bestOrder[slider])          
                 
             publish(bestOrder[slider])

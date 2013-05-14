@@ -10,7 +10,7 @@ robTemp = "0"
 visTemp = "0"
 
 def write():
-	if((robTemp=="1") and (visTemp=="1")):
+	if((visTemp=="1")):
 		ser.write("sta")
 		pub_msg = String()
    		pub_msg.data = "0"
@@ -42,7 +42,7 @@ def visCallback(data):
 
 def main():
 	rospy.init_node('plcControl', anonymous=True)
-	rospy.Subscriber("robotReady", String, robCallback)
+	#rospy.Subscriber("robotReady", String, robCallback)
 	rospy.Subscriber("visReady", String, visCallback)
 	
 	global ser
