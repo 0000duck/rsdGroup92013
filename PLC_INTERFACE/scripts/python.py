@@ -16,8 +16,9 @@ def write():
    		pub_msg.data = "0"
    		global pub
    		pub.publish(pub_msg)
-		time.sleep(2*0.81)
+		time.sleep(2*0.80)
 		ser.write("sto")
+		time.sleep(1)
 		pub_msg = String()
    		pub_msg.data = "1"
    		pub.publish(pub_msg)

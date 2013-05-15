@@ -1,0 +1,14 @@
+<package>
+  <description brief="MASTER_CONTROL">
+
+     MASTER_CONTROL
+
+  </description>
+  <author>RSD group9</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/MASTER_CONTROL</url>
+
+</package>
+
+
