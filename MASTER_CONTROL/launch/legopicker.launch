@@ -1,0 +1,15 @@
+<launch>
+
+	<group ns="PLC_INTERFACE">
+		<node pkg="PLC_INTERFACE" name="plc" type="python.py"> </node>
+	</group>
+
+	<group ns="ROBOT_CONTROL">
+		<node pkg="ROBOT_CONTROL" name="robot" type="robotCommandSender" args="1340"> </node>
+	</group>
+
+	<group ns="VISION">
+		<node pkg="VISION" name="vision" type="vision"> </node>
+	</group>
+
+</launch>

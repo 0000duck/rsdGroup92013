@@ -28,13 +28,3 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #rosbuild_link_boost(${PROJECT_NAME} thread)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
-rosbuild_add_executable(vision src/vision.cpp)
-rosbuild_add_executable(imgCap src/CaptureImage.cpp)
-
-
-find_package(OpenCV)
-include_directories(${OpenCV_INCLUDE_DIRS})
-target_link_libraries(vision ${OpenCV_LIBRARIES})
-target_link_libraries(imgCap ${OpenCV_LIBRARIES})
-
-
