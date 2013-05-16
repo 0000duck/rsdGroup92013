@@ -20,6 +20,9 @@ import warnings
 IP = '192.168.10.100'
 port = 80
 detectedBricks = [2,2,2]        # Red, Blue, Yellow (bricks)
+ROSDetectedBricks = []
+DetectionsCounter = -1
+tempCounter = -1
 base_url = 'http://192.168.10.100/'
 bestOrder_dict = {0: {'orderName':'None','orderState':"IDLE",'orderDone':True,'slider':3, 'bricks':0,'ticket':0,'redTotal':0,'blueTotal':0,'yellowTotal':0,'redPicked':0,'bluePicked':0,'yellowPicked':0,'redNeeded':0,'blueNeeded':0,'yellowNeeded':0},        1: {'orderName':'None','orderState':"IDLE",'orderDone':True,'slider':3, 'bricks':0,'ticket':0,'redTotal':0,'blueTotal':0,'yellowTotal':0,'redPicked':0,'bluePicked':0,'yellowPicked':0,'redNeeded':0,'blueNeeded':0,'yellowNeeded':0}}
 slider_dict = {0:{'busy':False,'orderName':'None'}, 1:{'busy':False,'orderName':'None'}}
@@ -53,12 +56,6 @@ def printOrderSpecs(order):
 def printSliderStatus(sliderStatus):
     print "Slider busy: " + str(sliderStatus['busy'])
     print "Slider Order name: " + str(sliderStatus['orderName']) 
-
-def BricksDetected():
-    if(detectedBricks[colors.RED]!= 0 and detectedBricks[colors.BLUE]!= 0 and detectedBricks[colors.YELLOW]!= 0):
-        return True
-    else:
-        return False
     
     
 def resetSlider(sliderStatus):
@@ -77,7 +74,8 @@ def assignSlider(bestOrder,sliderStatus):
         sliderStatus[1]['busy'] = True
         sliderStatus[1]['orderName'] = bestOrder['orderName']
         bestOrder['slider'] = 1
-        return sliderStatus     
+        return sliderStatus
+        
  
 ################################################################################################### 
 #------------------------------------ Parsing functions ------------------------------------------- 
@@ -99,6 +97,7 @@ def parseorderDetails(data,brickColor):
 def parseOrderReceipt(data):
     tree = xml.fromstring(data)
     return tree.text
+
     
 ################################################################################################### 
 #--------------------------------------- Take order functions ------------------------------------- 
@@ -217,7 +216,6 @@ def getSpecificOrder(prevOrderDetails,detectedBricks,orderProcess):
     print '\n ################################ \t Continued processing order: ' + prevOrderDetails['orderName'] + '\t ##########################'
     bricks = [0,0,0]
     bricks[colors.RED] = prevOrderDetails['redNeeded']      # We subtract the bricks that have already been picked up in the previous batch
-    print 'Red bricks!!!!!!!!!!!!!!!!!!!!!!! ' + str(bricks[colors.RED])
     if bricks[colors.RED] < 0:                      # Clamping
         bricks[colors.RED] = 0
     bricks[colors.BLUE] = prevOrderDetails['blueNeeded']
@@ -348,10 +346,11 @@ def publish(bestOrder):
 
 def visCallback(data):
     print "NEW BRICKS DETECTED!!!"
+    global DetectionsCounter
+    DetectionsCounter = DetectionsCounter + 1
     #listReceived = True
-    detectedBricks[colors.RED] = data.red
-    detectedBricks[colors.BLUE] = data.blue
-    detectedBricks[colors.YELLOW] = data.yellow
+    tempBricks = [data.red,data.blue,data.yellow]
+    ROSDetectedBricks.append(tempBricks)
 
 ################################################################################################### 
 #--------------------------------------- Main function -------------------------------------------- 
@@ -359,51 +358,52 @@ def visCallback(data):
 
 def main():
     rospy.init_node('orderSystem')
+    
     listReceived = True
     requestedOrders = '5'
     global bestOrder
     global ongoingOrder
     global orderProcess
     global sliderStatus
+    global DetectionsCounter
+    global detectedBricks
+    global ROSDetectedBricks
+    global tempCounter
     sliderStatus = dict(slider_dict)
     bestOrder = dict(bestOrder_dict)
     ongoingOrder = dict(bestOrder_dict)
     rospy.sleep(2.0)
     while not rospy.is_shutdown():
-        global detectedBricks
         try:
-            while (detectedBricks[colors.RED]== 0 and detectedBricks[colors.BLUE]== 0 and detectedBricks[colors.YELLOW]== 0):
+            #while (detectedBricks[colors.RED]== 0 and detectedBricks[colors.BLUE]== 0 and detectedBricks[colors.YELLOW]== 0):
+            while(DetectionsCounter < 0):
                 print  '\n ################################ \t Waiting for detected bricks \t \t ##########################'
-                detectedBricks = [random.randrange(0, 2),random.randrange(0, 2),random.randrange(0, 2)]
+                #detectedBricks = [random.randrange(0, 2),random.randrange(0, 2),random.randrange(0, 2)]
                 rospy.sleep(3.0)
         except KeyboardInterrupt:
             sys.exit()  
 
         orderProcess = not orderProcess
+        tempCounter = DetectionsCounter     # Finding out if there is a detection available
 
 ################################################################################################### 
 #--------------------------------------- Idle state -----------------------------------------------
 ###################################################################################################         
         
-        print '\n ################################ \t Order thread ' + str(int(orderProcess)) + ' processing \t \t \t \t ##########################'
-        
-        if (bestOrder[orderProcess]['orderState'] == "IDLE"):
-            if(listReceived == True):
-            
-                print '\n ################################ \t Detected bricks [RED BLUE YELLOW]: [' +  str(detectedBricks[colors.RED]) + ' ' + str(detectedBricks[colors.BLUE]) + ' ' + str(detectedBricks[colors.YELLOW]) + '] \t \t ##########################'
+        if (bestOrder[orderProcess]['orderState'] == "IDLE" and tempCounter >= 0):
+            if(tempCounter >= 0):
+                
+                print '\n ################################ \t Order thread ' + str(int(orderProcess)) + ' processing \t \t \t \t ##########################'
+                print '\n ################################ \t Detected bricks [RED BLUE YELLOW]: [' +  str(ROSDetectedBricks[tempCounter][colors.RED]) + ' ' + str(ROSDetectedBricks[tempCounter][colors.BLUE]) + ' ' + str(ROSDetectedBricks[tempCounter][colors.YELLOW]) + '] \t \t ##########################'
                 bestOrder[orderProcess]['orderState'] = "GET_ORDER"
                 
                 rospy.sleep(1.0)
-            else:
-                print "Waiting for Vision input"
-                listReceived=True       # Simulating Vision input
-                rospy.sleep(3.0)
                 
 ################################################################################################### 
 #--------------------------------------- Get order state ------------------------------------------ 
 ###################################################################################################                
-        if(bestOrder[orderProcess]['orderState'] =="GET_ORDER"):
-            bestOrder[orderProcess] = getOrders(requestedOrders, detectedBricks,orderProcess)   
+        if(bestOrder[orderProcess]['orderState'] =="GET_ORDER" and tempCounter >= 0):
+            bestOrder[orderProcess] = getOrders(requestedOrders, ROSDetectedBricks[tempCounter],orderProcess)   
             
             printOrderSpecs(bestOrder[orderProcess])
             
@@ -421,30 +421,20 @@ def main():
             print '\n ################################ \t Slider 1 \t \t ##########################'
             printSliderStatus(sliderStatus[1])
             
+            ROSDetectedBricks.pop(tempCounter)   
+            tempCounter = tempCounter - 1                                   # Remove detection list from input array and wait for new detection
+            DetectionsCounter = DetectionsCounter - 1
             rospy.sleep(1.0)
             
-            
-################################################################################################### 
-#--------------------------------------- Order done state ----------------------------------------- 
-###################################################################################################              
-        if(bestOrder[orderProcess]['orderState'] =="ORDER_DONE" and BricksDetected()):
-            #deleteOrder(bestOrder[slider]['orderName'],bestOrder[slider]['ticket'] )
-            sliderStatus = resetSlider(sliderStatus)
-            bestOrder[orderProcess]['slider'] = 3                           # To indicate that no slider is assigned
-            logMsg('COMPLETED', bestOrder[orderProcess]['orderName'])
-            # Signal Vision system that the order is done. Wait for new detectedBricks
-            bestOrder[orderProcess]['orderState'] = "IDLE"
-            
-            rospy.sleep(1.0)
             
 ################################################################################################### 
 #--------------------------------------- Order not done state ------------------------------------- 
 ###################################################################################################        
-        if(bestOrder[orderProcess]['orderState'] == "ORDER_NOT_DONE"):        
-            detectedBricks = [random.randrange(0, 4),random.randrange(0, 4),random.randrange(0, 4)]
-            print '\n ################################ \t New detected bricks [RED BLUE YELLOW]: [ ' + str(detectedBricks[0]), str(detectedBricks[1]), str(detectedBricks[2]) + '] \t \t ##########################'
+        if(bestOrder[orderProcess]['orderState'] == "ORDER_NOT_DONE" and tempCounter >= 0):        
+            #detectedBricks = [random.randrange(0, 4),random.randrange(0, 4),random.randrange(0, 4)]
+            print '\n ################################ \t New detected bricks [RED BLUE YELLOW]: [ ' + str(ROSDetectedBricks[tempCounter][colors.RED]), str(ROSDetectedBricks[tempCounter][colors.BLUE]), str(ROSDetectedBricks[tempCounter][colors.YELLOW]) + '] \t \t ##########################'
             
-            bestOrder[orderProcess] = getSpecificOrder(bestOrder[orderProcess],detectedBricks,orderProcess)
+            bestOrder[orderProcess] = getSpecificOrder(bestOrder[orderProcess],ROSDetectedBricks[tempCounter],orderProcess)
             
             print '\n ################################ \t Publishing old order: ' + str(bestOrder[orderProcess]['orderName']) + ' from order thread ' + str(int(orderProcess)) + '\t \t ##########################'
             publish(bestOrder[orderProcess])
@@ -453,16 +443,33 @@ def main():
                 sliderStatus = resetSlider(sliderStatus)
                 
             printOrderSpecs(bestOrder[orderProcess])          
-                
+            
+            print '\n ################################ \t Slider 0 \t \t ##########################'
+            printSliderStatus(sliderStatus[0])
+            print '\n ################################ \t Slider 1 \t \t ##########################'
+            printSliderStatus(sliderStatus[1])    
+            
+            ROSDetectedBricks.pop(tempCounter)   
+            tempCounter = tempCounter - 1                                   # Remove detection list from input array and wait for new detection
+            DetectionsCounter = DetectionsCounter - 1    
                 
             rospy.sleep(1.0)
-        
-        print '\n ################################ \t Slider 0 \t \t ##########################'
-        printSliderStatus(sliderStatus[0])
-        print '\n ################################ \t Slider 1 \t \t ##########################'
-        printSliderStatus(sliderStatus[1])
-        
+            
         rospy.sleep(1.0)
+        
+        
+################################################################################################### 
+#--------------------------------------- Order done state ----------------------------------------- 
+###################################################################################################              
+        if(bestOrder[orderProcess]['orderState'] =="ORDER_DONE"):
+            #deleteOrder(bestOrder[slider]['orderName'],bestOrder[slider]['ticket'] )
+            sliderStatus = resetSlider(sliderStatus)
+            bestOrder[orderProcess]['slider'] = 3                           # To indicate that no slider is assigned
+            logMsg('COMPLETED', bestOrder[orderProcess]['orderName'])
+            # Signal Vision system that the order is done. Wait for new detectedBricks
+            bestOrder[orderProcess]['orderState'] = "IDLE"
+            
+            rospy.sleep(1.0)
 
 ################################################################################################### 
 #--------------------------------------- ROS topic I/O -------------------------------------------- 
