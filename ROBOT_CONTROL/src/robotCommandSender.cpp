@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 {
 	ros::init(argc, argv, "robotCommandSender");
 	ros::NodeHandle h;
- 	ros::Publisher readyPub = h.advertise<std_msgs::String>("robotReady", 1);
+ 	ros::Publisher readyPub = h.advertise<std_msgs::String>("robotReady", 10);
  	ros::Subscriber sub = h.subscribe("newConfig", 10, configCallback);
  	ros::Subscriber convStopSub = h.subscribe("conveyerStopped", 10, convStopCallback);
 	
@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
 
     bzero(buffer,256);
 
-    ros::Rate loop_rate(10);
+    ros::Rate loop_rate(5);
 
 
 
@@ -94,21 +94,20 @@ int main(int argc, char *argv[])
 	std_msgs::String message;
 //	message.data="0";
 	///readyPub.publish(message);
+	bool hackEnable = true;
+	double timeHack= 0;
 
-    while (ros::ok())
-    {
-    	if(conveyerStopped==1){
+	while (ros::ok())
+	{
+		if(conveyerStopped==1){
 			if(!list1.empty()){
 				if(ready==1){
-					cout << "write" << endl;
 					message.data="0"; // conveyer may not move
-					//ROS_INFO("%s", message.data.c_str());
 					readyPub.publish(message);
 					string temp = list1.back();
 					list1.pop_back();
 					temp.append("\n");
 					const char* msg = temp.c_str();
-					//const char* msg ="( 0.05 , 0.05 , 0 , 0 , 0 , 0, 1,)";
 					n = write(newsockfd,msg,strlen(msg));
 
 					if (n < 0) error("ERROR writing to socket");
@@ -119,35 +118,71 @@ int main(int argc, char *argv[])
 			else{
 				conveyerStopped=0;
 				if(ready==2){
+					timeHack=ros::Time::now().toSec();
+					cout << timeHack << endl;
 					message.data="1"; // conveyer may move
 					readyPub.publish(message);
 				}
 			}
-    	}
+		}
 		n=read(newsockfd,buffer,5);
 
 		ready=atoi(buffer);
-		cout << "GUIUHJHIOFGYIOG " << ready << endl;
+		//cout << "end: " << ros::Time::now() << endl;
+
+		if(ros::Time::now().toSec()-timeHack > 10){
+			cout << ros::Time::now().toSec()-timeHack << endl;
+			message.data="1"; // conveyer may move
+			readyPub.publish(message);
+			timeHack=ros::Time::now().toSec();
+		}
 
 		ros::spinOnce();
 		loop_rate.sleep();
-    }
+	}
+    /*while (ros::ok())
+    {
+    	cout << "1" << endl;
+    	//cout << "start: "  << ros::Time::now() << endl;
+    	if(conveyerStopped==1){
+    	  	cout << "2" << endl;
+			if(ready==1){
 
-	/*n=0;
-	bzero(buffer,256);
-	while(true){	
-     		sleep(2);
-    		n = read(newsockfd,buffer,5);
- 		ROS_INFO("%s", buffer);
-		//cout << buffer << endl;
-		//cout << n << endl;
-		if(n>0){
-			const char* msg1 ="( 0.05 , 0.05 , 0 , 0 , 0 , 0, 2)";
-			n = write(newsockfd,msg1,strlen(msg1));
-			std::cout << "lala2"<< std::endl;
-			break;
-		}
-	}*/
+				cout << "3" << endl;
+				if(!list1.empty()){
+				  	cout << "4" << endl;
+					message.data="0"; // conveyer may not move
+					string temp = list1.back();
+					list1.pop_back();
+					temp.append("\n");
+					const char* msg = temp.c_str();
+					n = write(newsockfd,msg,strlen(msg));
+				  	cout << "5" << endl;
+					if (n < 0) error("ERROR writing to socket");
+
+					ready=0;
+				}
+				else{
+				  	cout << "6" << endl;
+					cout << "list empty" <<endl;
+					//conveyerStopped=0;
+					message.data="1"; // conveyer may move
+				}
+			}
+
+
+    	}
+      	cout << "7" << endl;
+    	readyPub.publish(message);
+		n=read(newsockfd,buffer,5);
+	  	cout << "8" << endl;
+		ready=atoi(buffer);
+		//cout << "end: " << ros::Time::now() << endl;
+		ros::spinOnce();
+		loop_rate.sleep();
+	  	cout << "9" << endl;
+    }*/
+
 
     cout << "a" << endl;
     close(newsockfd);

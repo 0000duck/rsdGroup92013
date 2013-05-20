@@ -344,12 +344,17 @@ def publish(bestOrder):
 ################################################################################################### 
 
 def visCallback(data):
-    print "NEW BRICKS DETECTED!!!"
     global DetectionsCounter
-    DetectionsCounter = DetectionsCounter + 1
-    #listReceived = True
-    tempBricks = [data.red,data.blue,data.yellow]
-    ROSDetectedBricks.append(tempBricks)
+    if(data.red == 0 and data.blue == 0 and data.yellow == 0):
+        print 'No bricks detected'
+    else:
+        DetectionsCounter = DetectionsCounter + 1
+        #listReceived = True
+        print 'Input data: ' + str(data.red) + ', ' + str(data.blue) + ', ' + str(data.yellow)
+        tempBricks = [data.red,data.blue,data.yellow]
+        ROSDetectedBricks.append(tempBricks) 
+        print "ROS array: " + str(ROSDetectedBricks)
+    
 
 ################################################################################################### 
 #--------------------------------------- Main function -------------------------------------------- 
@@ -371,11 +376,10 @@ def main():
     sliderStatus = dict(slider_dict)
     bestOrder = dict(bestOrder_dict)
     ongoingOrder = dict(bestOrder_dict)
-    rospy.sleep(2.0)
     while not rospy.is_shutdown():
         try:
             #while (detectedBricks[colors.RED]== 0 and detectedBricks[colors.BLUE]== 0 and detectedBricks[colors.YELLOW]== 0):
-            while(DetectionsCounter < 0):
+            while(DetectionsCounter < 0 and not rospy.is_shutdown()):
                 print  '\n ################################ \t Waiting for detected bricks \t \t ##########################'
                 #detectedBricks = [random.randrange(0, 2),random.randrange(0, 2),random.randrange(0, 2)]
                 rospy.sleep(2.0)
@@ -400,6 +404,7 @@ def main():
 #--------------------------------------- Get order state ------------------------------------------ 
 ###################################################################################################                
         if(bestOrder[orderProcess]['orderState'] =="GET_ORDER" and tempCounter >= 0):
+            print 'ROS detect array: ' + str(ROSDetectedBricks[tempCounter])
             bestOrder[orderProcess] = getOrders(requestedOrders, ROSDetectedBricks[tempCounter],orderProcess)   
             
             printOrderSpecs(bestOrder[orderProcess])

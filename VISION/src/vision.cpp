@@ -19,16 +19,30 @@
 #define redMax    18000
 #define yellowMin 22000//16000
 #define yellowMax 30000//24000
+#define RED 0
+#define BLUE 1
+#define YELLOW 2
 
 using namespace std;
 using namespace cv;
 
 int conveyerStopped = 1;
 int robReady = 0;
+int wantedRed =0;
+int wantedBlue=0;
+int wantedYellow=0;
+int currentOrder=-1;
+int countPub=0;
 
-vector<string> list1;
+struct sendCommand{
+	string s;
+	int color;
+};
 
-string constructCommand(double xPos, double yPos, double angle, int slider){
+
+vector<sendCommand> list1;
+
+string constructCommand(double xPos, double yPos, double angle, int color, int slider){
 	ostringstream s;
 	string temp="(";
 	string temp2;
@@ -52,10 +66,10 @@ string constructCommand(double xPos, double yPos, double angle, int slider){
 	temp.append(", ");
 
 	s.str(string());
-	s << slider;
+	s << color;
 	temp2=s.str();
 	temp.append(temp2);
-	temp.append(")");
+	temp.append(", ");
 
 	return temp;
 }
@@ -79,7 +93,7 @@ void colorFilter(const Mat& src, Mat& bw)
 }
 
 
-void getBricks(Mat& imgEdge, Mat& imgROI, ros::Publisher configPub, ros::Publisher seenPub, ros::Publisher readyPub){
+void getBricks(Mat& imgEdge, Mat& imgROI, ros::Publisher seenPub){
 		Mat imgCon;
 
 	//Vectors for storing the connected components in:
@@ -106,7 +120,6 @@ void getBricks(Mat& imgEdge, Mat& imgROI, ros::Publisher configPub, ros::Publish
 		int color=0;
 		RotatedRect rectangle;
 		RotatedRect ellipse;
-
 		int blue=0;
 		int red=0;
 		int yellow=0;
@@ -133,6 +146,7 @@ void getBricks(Mat& imgEdge, Mat& imgROI, ros::Publisher configPub, ros::Publish
 			int slider=1;
 			//constructCommand(xPos, yPos, angle, slider);
 
+			sendCommand temp;
 			if(aera<blueMax && aera>blueMin) //Blue
 			{ //list.push_back("( 0.018 , 0.053 , 0 , 0 , 0 , -0.13, 1,)");
 				color=1;
@@ -143,7 +157,9 @@ void getBricks(Mat& imgEdge, Mat& imgROI, ros::Publisher configPub, ros::Publish
 					}
 				cout << "Color: " <<color << " Center (m): " <<xPos <<","<< yPos << " Angle (rad): " << angle << endl;
 				if(angle<PI/2 && angle>-PI/2){
-					list1.push_back(constructCommand(xPos, yPos, angle, slider));
+					temp.s=constructCommand(xPos, yPos, angle, BLUE,slider);
+					temp.color=BLUE;
+					list1.push_back(temp);
 					blue++;
 					count++;
 				}
@@ -159,7 +175,9 @@ void getBricks(Mat& imgEdge, Mat& imgROI, ros::Publisher configPub, ros::Publish
 					}
 				if(angle<PI/2 && angle>-PI/2){
 					cout << "Color: " <<color << " Center (m): " <<xPos <<","<< yPos << " Angle (rad): " << angle << endl;
-					list1.push_back(constructCommand(xPos, yPos, angle, slider));
+					temp.s=constructCommand(xPos, yPos, angle, RED,slider);
+					temp.color=RED;
+					list1.push_back(temp);
 					red++;
 					count++;
 				}
@@ -175,7 +193,9 @@ void getBricks(Mat& imgEdge, Mat& imgROI, ros::Publisher configPub, ros::Publish
 					}
 				if(angle<PI/2 && angle>-PI/2){
 					cout << "Color: " <<color << " Center (m): " <<xPos <<","<< yPos << " Angle (rad): " << angle << endl;
-					list1.push_back(constructCommand(xPos, yPos, angle, slider));
+					temp.s=constructCommand(xPos, yPos, angle, YELLOW,slider);
+					temp.color=YELLOW;
+					list1.push_back(temp);
 					yellow++;
 					count++;
 				}
@@ -187,25 +207,105 @@ void getBricks(Mat& imgEdge, Mat& imgROI, ros::Publisher configPub, ros::Publish
 		}
 		cout << "Number of detected LEGO bricks: " << count << endl;
 
-		MESSAGES::order seen;
-		seen.blue=blue;
-		seen.red=red;
-		seen.yellow=yellow;
-		seenPub.publish(seen);
-
-
-
-		while(!list1.empty()){
-			std_msgs::String message;
-			message.data=list1.back();
-			configPub.publish(message);
-			list1.pop_back();
+		if(count>0){
+			MESSAGES::order seen;
+			seen.blue=blue;
+			seen.red=red;
+			seen.yellow=yellow;
+			seenPub.publish(seen);
 		}
-		std_msgs::String message;
-		message.data="1";
-		readyPub.publish(message);
+
+		if(count==0)
+			currentOrder=1;
+
 		conveyerStopped=0;
 		robReady=0;
+}
+
+
+void reqPickOfBricks(ros::Publisher configPub, ros::Publisher readyPub){
+
+	while(!list1.empty()){
+
+		if(list1.back().color==RED){
+			if(wantedRed>0){
+				wantedRed--;
+				std_msgs::String message;
+				message.data=list1.back().s;
+
+				ostringstream s;
+				s.str(string());
+				s << currentOrder;
+				message.data.append(s.str());
+				message.data.append(")");
+				cout << message.data <<endl;
+
+				configPub.publish(message);
+				list1.pop_back();
+				cout << "send r" << endl;
+
+			}
+			else{
+				list1.pop_back();
+				cout << "removed order" << endl;
+			}
+		}
+
+		else if(list1.back().color==BLUE){
+			if(wantedBlue>0){
+				wantedBlue--;
+				std_msgs::String message;
+				message.data=list1.back().s;
+
+				ostringstream s;
+				s.str(string());
+				s << currentOrder;
+				message.data.append(s.str());
+				message.data.append(")");
+				cout << message.data <<endl;
+
+				configPub.publish(message);
+				list1.pop_back();
+				cout << "send b" << endl;
+
+			}
+			else{
+				list1.pop_back();
+				cout << "removed order" << endl;
+			}
+		}
+
+		else if(list1.back().color==YELLOW){
+			if(wantedYellow>0){
+				wantedYellow--;
+				std_msgs::String message;
+				message.data=list1.back().s;
+
+				ostringstream s;
+				s.str(string());
+				s << currentOrder;
+				message.data.append(s.str());
+				message.data.append(")");
+				cout << message.data <<endl;
+
+				configPub.publish(message);
+				list1.pop_back();
+				cout << "send y" << endl;
+			}
+			else{
+				list1.pop_back();
+				cout << "removed order" << endl;
+			}
+		}
+	}
+
+
+	std_msgs::String message;
+	message.data="1";
+	readyPub.publish(message);
+
+	currentOrder=-1;
+	cout << "end: " << ros::Time::now() << endl;
 }
 
 void robRCallback(const std_msgs::String::ConstPtr& msg)
@@ -217,6 +317,14 @@ void convStopCallback(const std_msgs::String::ConstPtr& msg)
 {
 	conveyerStopped=atoi(msg->data.c_str());
 }
+void chosenOCallback(const MESSAGES::order:: ConstPtr& wanted)
+{
+	wantedRed=wanted->red;
+	wantedBlue=wanted->blue;
+	wantedYellow=wanted->yellow;
+	//currentOrder=1;
+	currentOrder=wanted->slider;
+}
 
 
 int main(int argc, char *argv[])
@@ -225,7 +333,8 @@ int main(int argc, char *argv[])
 	ros::NodeHandle h;
 	ros::Publisher configPub = h.advertise<std_msgs::String>("newConfig", 20);
 	ros::Publisher seenPub = h.advertise<MESSAGES::order>("visDetected", 20);
- 	ros::Publisher readyPub = h.advertise<std_msgs::String>("visReady", 1);
+ 	ros::Publisher readyPub = h.advertise<std_msgs::String>("visReady", 10);
+ 	ros::Subscriber pickup = h.subscribe("chosenOrder", 10, chosenOCallback);
  	ros::Subscriber robRSub = h.subscribe("robotReady", 10, robRCallback);
  	ros::Subscriber convStopSub = h.subscribe("conveyerStopped", 10, convStopCallback);
 
@@ -281,18 +390,21 @@ int main(int argc, char *argv[])
 	vm.push_back(imread("lego1.png",1));
 	vm.push_back(imread("lego.png",1));*/
 	while(ros::ok()){
-
+		cout << "start: "  << ros::Time::now() << endl;
 		cap >> frame; //grab a frame
+
+		if(currentOrder!=-1)
+			reqPickOfBricks(configPub, readyPub);
 
 		if(robReady==1 && conveyerStopped==1){
 			Mat src, dst, imgROI, hsv, bw;
-			std_msgs::String message;
+		/*	std_msgs::String message;
 			message.data="0";
-			readyPub.publish(message);
+			readyPub.publish(message);*/
 
 			src = frame.clone(); //make a clone of the captured image
 			//src=imread("Webcam.png",1);
-			imwrite("Webcam.png",src);
+			//imwrite("Webcam.png",src);
 			//src = imread("lego.png",1); //Use saved test image
 			/*if(!vm.empty()){
 				src=vm.back();
@@ -302,8 +414,8 @@ int main(int argc, char *argv[])
 			cvtColor(src,hsv,CV_BGR2HSV); //Convert to HSV
 
 			colorFilter(hsv,bw);
-			imwrite("bw.png", bw);
-			getBricks(bw,src, configPub, seenPub, readyPub);
+			//imwrite("bw.png", bw);
+			getBricks(bw,src, seenPub);
 		}
 
 		ros::spinOnce();

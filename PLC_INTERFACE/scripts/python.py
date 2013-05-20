@@ -33,13 +33,28 @@ def robCallback(data):
 		robTemp=signal
 		write()
 		
+#===============================================================================
+# def visCallback(data):
+# 	signal = data.data
+# 	global visTemp
+# 	print signal + ' , ' + visTemp
+# 	if(signal!=visTemp):
+# 		visTemp=signal
+# 		write()
+#===============================================================================
 def visCallback(data):
-	signal = data.data
-	global visTemp
-	if(signal!=visTemp):
-		visTemp=signal
-		write()
-		
+	if((data.data=="1")):
+		ser.write("sta")
+		pub_msg = String()
+   		pub_msg.data = "0"
+   		global pub
+   		pub.publish(pub_msg)
+		time.sleep(2*0.80)
+		ser.write("sto")
+		time.sleep(1)
+		pub_msg = String()
+   		pub_msg.data = "1"
+   		pub.publish(pub_msg)
 
 def main():
 	rospy.init_node('plcControl', anonymous=True)
