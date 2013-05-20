@@ -1,0 +1,18 @@
+<package>
+  <description brief="GUI">
+
+     GUI
+
+  </description>
+  <author>Jesper</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/GUI</url>
+  <depend package="qt_build"/>
+  <depend package="roscpp"/>
+
+
+  <rosdep name="libqt4-dev"/>
+  <depend package="qt_build"/>
+  <depend package="roscpp"/>
+</package>

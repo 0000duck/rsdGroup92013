@@ -26,7 +26,7 @@ void error(const char *msg)
 void configCallback(const std_msgs::String::ConstPtr& msg)
 {
 	list1.push_back(msg->data);
-	cout << "rec" << list1.back() << endl;
+	std::cout << "rec" << list1.back() << endl;
 }
 
 void convStopCallback(const std_msgs::String::ConstPtr& msg)
