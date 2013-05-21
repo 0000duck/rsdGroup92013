@@ -14,7 +14,7 @@
    <bool>false</bool>
   </property>
   <property name="windowTitle">
-   <string>RosApp</string>
+   <string>QRosApp</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../resources/images.qrc">
@@ -44,10 +44,10 @@
        </property>
        <layout class="QGridLayout" name="gridLayout_2">
         <item row="0" column="2">
-         <widget class="QLCDNumber" name="lcdNumber"/>
+         <widget class="QLCDNumber" name="lcd_oee"/>
         </item>
         <item row="1" column="2">
-         <widget class="QLCDNumber" name="lcdNumber_2"/>
+         <widget class="QLCDNumber" name="lcd_a"/>
         </item>
         <item row="0" column="1">
          <widget class="QLabel" name="label_4">
@@ -78,10 +78,10 @@
          </widget>
         </item>
         <item row="3" column="2">
-         <widget class="QLCDNumber" name="lcdNumber_4"/>
+         <widget class="QLCDNumber" name="lcd_q"/>
         </item>
         <item row="2" column="2">
-         <widget class="QLCDNumber" name="lcdNumber_3"/>
+         <widget class="QLCDNumber" name="lcd_p"/>
         </item>
        </layout>
       </widget>
@@ -96,21 +96,21 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <widget class="QPushButton" name="pushButton">
+         <widget class="QPushButton" name="pushButton_start">
           <property name="text">
            <string>START</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_4">
+         <widget class="QPushButton" name="pushButton_pause">
           <property name="text">
            <string>PAUSE</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_2">
+         <widget class="QPushButton" name="pushButton_stop">
           <property name="text">
            <string>STOP</string>
           </property>
@@ -129,7 +129,7 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
-         <widget class="QPushButton" name="pushButton_3">
+         <widget class="QPushButton" name="pushButton_status">
           <property name="text">
            <string>STATUS CHECK</string>
           </property>
@@ -148,7 +148,7 @@
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <widget class="QGraphicsView" name="graphicsView">
+         <widget class="QGraphicsView" name="graphics_red">
           <property name="autoFillBackground">
            <bool>true</bool>
           </property>
@@ -167,7 +167,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QGraphicsView" name="graphicsView_3">
+         <widget class="QGraphicsView" name="graphics_yellow">
           <property name="autoFillBackground">
            <bool>true</bool>
           </property>
@@ -195,7 +195,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QGraphicsView" name="graphicsView_2">
+         <widget class="QGraphicsView" name="graphics_green">
           <property name="backgroundBrush">
            <brush brushstyle="NoBrush">
             <color alpha="255">
@@ -236,7 +236,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLCDNumber" name="lcdNumber_5"/>
+         <widget class="QLCDNumber" name="lcd_order"/>
         </item>
        </layout>
       </widget>
@@ -258,7 +258,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLCDNumber" name="lcdNumber_6"/>
+         <widget class="QLCDNumber" name="lcd_run"/>
         </item>
        </layout>
       </widget>
@@ -317,10 +317,9 @@
   </action>
  </widget>
  <tabstops>
-  <tabstop>pushButton</tabstop>
-  <tabstop>pushButton_4</tabstop>
-  <tabstop>pushButton_2</tabstop>
-  <tabstop>pushButton_3</tabstop>
+  <tabstop>pushButton_pause</tabstop>
+  <tabstop>pushButton_stop</tabstop>
+  <tabstop>pushButton_status</tabstop>
  </tabstops>
  <resources>
   <include location="../resources/images.qrc"/>

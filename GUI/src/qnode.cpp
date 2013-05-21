@@ -13,19 +13,35 @@
 #include <ros/ros.h>
 #include <ros/network.h>
 #include <string>
+#include <vector>
+#include <std_msgs/Int64.h>
+#include <cstdlib>
 #include <std_msgs/String.h>
+#include <std_msgs/Bool.h>
 #include <sstream>
 #include "../include/GUI/qnode.hpp"
 
 /*****************************************************************************
 ** Namespaces
 *****************************************************************************/
+int TotalOrders = 1;
+
+int getTotalOrders() {
+	return TotalOrders;
+}
 
 namespace GUI {
+
 
 /*****************************************************************************
 ** Implementation
 *****************************************************************************/
+void TotalOrdersCallback(const std_msgs::Int64::ConstPtr& msg)
+{
+	TotalOrders = msg->data;
+	ROS_INFO("Total orders incremented");
+}
+
 
 QNode::QNode(int argc, char** argv ) :
 	init_argc(argc),
@@ -46,40 +62,19 @@ bool QNode::init() {
 		return false;
 	}
 	ros::start(); // explicitly needed since our nodehandle is going out of scope.
-	ros::NodeHandle n;
-	// Add your ros communications here.
-	chatter_publisher = n.advertise<std_msgs::String>("chatter", 1000);
+    ros::NodeHandle h;
+    TotalOrdersSub = h.subscribe("TotalOrders", 10, TotalOrdersCallback);
+    pauseMsg = h.advertise<std_msgs::Bool>("/systemPause", 10);
 	start();
 	return true;
 }
 
-bool QNode::init(const std::string &master_url, const std::string &host_url) {
-	std::map<std::string,std::string> remappings;
-	remappings["__master"] = master_url;
-	remappings["__hostname"] = host_url;
-	ros::init(remappings,"GUI");
-	if ( ! ros::master::check() ) {
-		return false;
-	}
-	ros::start(); // explicitly needed since our nodehandle is going out of scope.
-	ros::NodeHandle n;
-	// Add your ros communications here.
-	chatter_publisher = n.advertise<std_msgs::String>("chatter", 1000);
-	start();
-	return true;
-}
 
 void QNode::run() {
 	ros::Rate loop_rate(1);
 	int count = 0;
 	while ( ros::ok() ) {
 
-		std_msgs::String msg;
-		std::stringstream ss;
-		ss << "hello world " << count;
-		msg.data = ss.str();
-		chatter_publisher.publish(msg);
-		log(Info,std::string("I sent: ")+msg.data);
 		ros::spinOnce();
 		loop_rate.sleep();
 		++count;
@@ -88,40 +83,18 @@ void QNode::run() {
 	Q_EMIT rosShutdown(); // used to signal the gui for a shutdown (useful to roslaunch)
 }
 
-
-void QNode::log( const LogLevel &level, const std::string &msg) {
-	logging_model.insertRows(logging_model.rowCount(),1);
-	std::stringstream logging_model_msg;
-	switch ( level ) {
-		case(Debug) : {
-				ROS_DEBUG_STREAM(msg);
-				logging_model_msg << "[DEBUG] [" << ros::Time::now() << "]: " << msg;
-				break;
-		}
-		case(Info) : {
-				ROS_INFO_STREAM(msg);
-				logging_model_msg << "[INFO] [" << ros::Time::now() << "]: " << msg;
-				break;
-		}
-		case(Warn) : {
-				ROS_WARN_STREAM(msg);
-				logging_model_msg << "[INFO] [" << ros::Time::now() << "]: " << msg;
-				break;
-		}
-		case(Error) : {
-				ROS_ERROR_STREAM(msg);
-				logging_model_msg << "[ERROR] [" << ros::Time::now() << "]: " << msg;
-				break;
-		}
-		case(Fatal) : {
-				ROS_FATAL_STREAM(msg);
-				logging_model_msg << "[FATAL] [" << ros::Time::now() << "]: " << msg;
-				break;
-		}
+void QNode::PauseSystem() {
+	std_msgs::Bool pauseSig;
+	pauseSig.data = true;
+	if(!pauseMsg)
+	{
+		ROS_WARN("Publisher invalid!");
 	}
-	QVariant new_row(QString(logging_model_msg.str().c_str()));
-	logging_model.setData(logging_model.index(logging_model.rowCount()-1),new_row);
-	Q_EMIT loggingUpdated(); // used to readjust the scrollbar
+	else
+	{
+		pauseMsg.publish(pauseSig);
+	}
 }
+
 
 }  // namespace GUI

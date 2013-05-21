@@ -21,6 +21,10 @@
 #include <QThread>
 #include <QStringListModel>
 
+/*****************************************************************************
+** Function declarations
+*****************************************************************************/
+int getTotalOrders();
 
 /*****************************************************************************
 ** Namespaces
@@ -40,32 +44,21 @@ public:
 	bool init();
 	bool init(const std::string &master_url, const std::string &host_url);
 	void run();
-
-	/*********************
-	** Logging
-	**********************/
-	enum LogLevel {
-	         Debug,
-	         Info,
-	         Warn,
-	         Error,
-	         Fatal
-	 };
-
-	QStringListModel* loggingModel() { return &logging_model; }
-	void log( const LogLevel &level, const std::string &msg);
+	void PauseSystem();
 
 Q_SIGNALS:
-	void loggingUpdated();
     void rosShutdown();
 
 private:
 	int init_argc;
 	char** init_argv;
-	ros::Publisher chatter_publisher;
+	ros::Subscriber sub;
+	ros::Subscriber TotalOrdersSub;
+	ros::Publisher pauseMsg;
     QStringListModel logging_model;
 };
 
 }  // namespace GUI
+
 
 #endif /* GUI_QNODE_HPP_ */
