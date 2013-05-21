@@ -305,7 +305,6 @@ void reqPickOfBricks(ros::Publisher configPub, ros::Publisher readyPub){
 	readyPub.publish(message);
 
 	currentOrder=-1;
-	cout << "end: " << ros::Time::now() << endl;
 }
 
 void robRCallback(const std_msgs::String::ConstPtr& msg)
@@ -331,12 +330,12 @@ int main(int argc, char *argv[])
 {
 	ros::init(argc, argv, "vision");
 	ros::NodeHandle h;
-	ros::Publisher configPub = h.advertise<std_msgs::String>("newConfig", 20);
-	ros::Publisher seenPub = h.advertise<MESSAGES::order>("visDetected", 20);
- 	ros::Publisher readyPub = h.advertise<std_msgs::String>("visReady", 10);
- 	ros::Subscriber pickup = h.subscribe("chosenOrder", 10, chosenOCallback);
- 	ros::Subscriber robRSub = h.subscribe("robotReady", 10, robRCallback);
- 	ros::Subscriber convStopSub = h.subscribe("conveyerStopped", 10, convStopCallback);
+	ros::Publisher configPub = h.advertise<std_msgs::String>("/newConfig", 20);
+	ros::Publisher seenPub = h.advertise<MESSAGES::order>("/visDetected", 20);
+ 	ros::Publisher readyPub = h.advertise<std_msgs::String>("/visReady", 10);
+ 	ros::Subscriber pickup = h.subscribe("/chosenOrder", 10, chosenOCallback);
+ 	ros::Subscriber robRSub = h.subscribe("/robotReady", 10, robRCallback);
+ 	ros::Subscriber convStopSub = h.subscribe("/conveyerStopped", 10, convStopCallback);
 
 	system("v4l2-ctl --set-ctrl white_balance_temperature_auto=0");
 	system("v4l2-ctl --set-ctrl brightness=50");
@@ -389,9 +388,14 @@ int main(int argc, char *argv[])
 	vm.push_back(imread("lego2.png",1));
 	vm.push_back(imread("lego1.png",1));
 	vm.push_back(imread("lego.png",1));*/
+	int frameCount =0;
+
 	while(ros::ok()){
-		cout << "start: "  << ros::Time::now() << endl;
-		cap >> frame; //grab a frame
+		//cout << "start: "  << ros::Time::now() << endl;
+		if(frameCount>2){
+			cap >> frame; //grab a frame
+			frameCount=0;
+		}
 
 		if(currentOrder!=-1)
 			reqPickOfBricks(configPub, readyPub);
@@ -420,9 +424,10 @@ int main(int argc, char *argv[])
 
 		ros::spinOnce();
 		loop_rate.sleep();
+
+		frameCount++;
 	}
 
 
-	waitKey(0);
 	return 0;
 }

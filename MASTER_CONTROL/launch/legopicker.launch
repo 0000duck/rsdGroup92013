@@ -5,11 +5,15 @@
 	</group>
 
 	<group ns="ROBOT_CONTROL">
-		<node pkg="ROBOT_CONTROL" name="robot" type="robotCommandSender" args="1340"> </node>
+		<node pkg="ROBOT_CONTROL" name="robot" type="robotCommandSender" args="1343"> </node>
 	</group>
 
 	<group ns="VISION">
 		<node pkg="VISION" name="vision" type="vision"> </node>
+	</group>
+
+	<group ns="ORDER_SYSTEM">
+		<node pkg="ORDER_SYSTEM" name="orderSystem" type="orderSystem.py"> </node>
 	</group>
 
 </launch>

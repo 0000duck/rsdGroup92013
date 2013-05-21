@@ -38,9 +38,9 @@ int main(int argc, char *argv[])
 {
 	ros::init(argc, argv, "robotCommandSender");
 	ros::NodeHandle h;
- 	ros::Publisher readyPub = h.advertise<std_msgs::String>("robotReady", 10);
- 	ros::Subscriber sub = h.subscribe("newConfig", 10, configCallback);
- 	ros::Subscriber convStopSub = h.subscribe("conveyerStopped", 10, convStopCallback);
+ 	ros::Publisher readyPub = h.advertise<std_msgs::String>("/robotReady", 10);
+ 	ros::Subscriber sub = h.subscribe("/newConfig", 10, configCallback);
+ 	ros::Subscriber convStopSub = h.subscribe("/conveyerStopped", 10, convStopCallback);
 	
 	int sockfd, newsockfd, portno;
     socklen_t clilen;

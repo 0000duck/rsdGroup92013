@@ -471,6 +471,6 @@ def main():
 ###################################################################################################
 
 if __name__ == '__main__':
-   pub = rospy.Publisher('chosenOrder', order)
-   rospy.Subscriber("visDetected", order, visCallback)
+   pub = rospy.Publisher('/chosenOrder', order)
+   rospy.Subscriber("/visDetected", order, visCallback)
    main()

@@ -59,7 +59,7 @@ def visCallback(data):
 def main():
 	rospy.init_node('plcControl', anonymous=True)
 	#rospy.Subscriber("robotReady", String, robCallback)
-	rospy.Subscriber("visReady", String, visCallback)
+	rospy.Subscriber("/visReady", String, visCallback)
 	
 	global ser
 	ser = serial.Serial('/dev/ttyUSB0', 19200, timeout=1)
@@ -92,5 +92,5 @@ def main():
 
 
 if __name__ == '__main__':
-	pub = rospy.Publisher("conveyerStopped", String)
+	pub = rospy.Publisher("/conveyerStopped", String)
 	main()
