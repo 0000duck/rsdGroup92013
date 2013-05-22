@@ -3,6 +3,7 @@
 #include "std_msgs/String.h"
 #include "std_msgs/Int64.h"
 #include "std_msgs/Bool.h"
+#include "MESSAGES/oee.h"
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -82,7 +83,9 @@ int main(int argc, char *argv[])
 {
 	ros::init(argc, argv, "master");
 	ros::NodeHandle h;
- 	//ros::Publisher readyPub = h.advertise<std_msgs::String>("/robotReady", 10);
+ 	ros::Publisher oeePub = h.advertise<MESSAGES::oee>("/oeeInfo", 10);
+ 	ros::Publisher timePub = h.advertise<std_msgs::Int64>("/time", 1);
+ 	ros::Publisher packMLPub = h.advertise<std_msgs::Int64>("/packMLState", 10);
  	ros::Subscriber compSub = h.subscribe("/orderComplete", 10, oCompCallback);
  	ros::Subscriber staSub = h.subscribe("/orderStarted", 10, oStartCallback);
  	ros::Subscriber pauSub = h.subscribe("/systemPause", 10, pauseCallback);
@@ -97,18 +100,22 @@ int main(int argc, char *argv[])
 		//ROS_INFO("%f", ros::Time::now().toSec());
 
 		plannedTime = ros::Time::now().toSec()+offset;
-		ROS_INFO("%f",ordersStarted);
-		ROS_INFO("%f", ordersCompleted);
-		ROS_INFO("%f", ros::Time::now().toSec()+offset);
 		double a = calcAvailability(plannedTime-stallTime,plannedTime);
 		double p = calcPerformance(plannedTime-stallTime);
 		double q = calcQuality();
 		int oee = calcOEE(a,p,q);
 
-		cout << a << endl;
-		cout << p <<  endl;
-		cout << q << endl;
-		cout << oee << endl << endl;
+		MESSAGES::oee oeeInfo;
+		oeeInfo.availability=int(a);
+		oeeInfo.performance=int(p);
+		oeeInfo.quality=int(q);
+		oeeInfo.oee=int(oee);
+		oeePub.publish(oeeInfo);
+
+		std_msgs::Int64 timeMsg;
+		timeMsg.data=plannedTime-stallTime;
+		timePub.publish(timeMsg);
+
 
 		ros::spinOnce();
 		loop_rate.sleep();

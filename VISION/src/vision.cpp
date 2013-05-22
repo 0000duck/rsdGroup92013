@@ -13,12 +13,12 @@
 #define scale 0.000195 //Conversion from pixel to meter in the image. Calculated by actual size in meters of the image divided by the resolution
 #define offsetX -0.125 //Move the origo (0,0) position from the upper left corner to the center of the image
 #define offsetY -0.07 //in both directions. The image size is 0.25 by 0.14 meters
-#define blueMin   5000
-#define blueMax   10000
-#define redMin    14000
-#define redMax    18000
-#define yellowMin 22000//16000
-#define yellowMax 30000//24000
+#define blueMin    5000
+#define blueMax   12000
+#define redMin    17000
+#define redMax    24000
+#define yellowMin 27000//16000
+#define yellowMax 36000//24000
 #define RED 0
 #define BLUE 1
 #define YELLOW 2
@@ -77,18 +77,20 @@ string constructCommand(double xPos, double yPos, double angle, int color, int s
 void colorFilter(const Mat& src, Mat& bw)
 {
     assert(src.type() == CV_8UC3);
-    Mat colors, red1, red2, yellow, blue, purple;
+    Mat colors, red, yellow, blue;
     GaussianBlur( src, src, Size(3, 3), 2, 2 );
-  	inRange(src, Scalar(  0, 50, 75), Scalar(25, 255, 255), red1);	//Red lower
+  	inRange(src, Scalar(  0, 50, 75), Scalar(25, 255, 255), red);	//Red lower
   	inRange(src, Scalar( 14, 200, 130), Scalar(34, 255, 255), yellow);	//Yellow
-  	inRange(src, Scalar( 90, 5, 25), Scalar(155, 255, 255), blue);	//Blue
+  	inRange(src, Scalar( 90, 5, 15), Scalar(160, 255, 255), blue);	//Blue
 
-  	colors = red1 + yellow + blue;// + red2;
+  	colors = red + yellow + blue;
 
   	//Noise removal
-  	Mat element = getStructuringElement(MORPH_RECT, Size(6, 6));
-  	Mat element1 = getStructuringElement(MORPH_RECT, Size(12, 12));
+  	Mat element = getStructuringElement(MORPH_RECT, Size(10, 10));
+  	Mat element1 = getStructuringElement(MORPH_RECT, Size(25, 25));
+  	imwrite("colors.png", colors);
   	dilate(colors,colors,element1);
+  	imwrite("dialate.png", colors);
   	erode(colors,bw,element);
 }
 
@@ -408,7 +410,7 @@ int main(int argc, char *argv[])
 
 			src = frame.clone(); //make a clone of the captured image
 			//src=imread("Webcam.png",1);
-			//imwrite("Webcam.png",src);
+			imwrite("raw.png",src);
 			//src = imread("lego.png",1); //Use saved test image
 			/*if(!vm.empty()){
 				src=vm.back();
@@ -418,7 +420,7 @@ int main(int argc, char *argv[])
 			cvtColor(src,hsv,CV_BGR2HSV); //Convert to HSV
 
 			colorFilter(hsv,bw);
-			//imwrite("bw.png", bw);
+			imwrite("bw.png", bw);
 			getBricks(bw,src, seenPub);
 		}
 
