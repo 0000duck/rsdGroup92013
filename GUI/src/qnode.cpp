@@ -20,6 +20,7 @@
 #include <std_msgs/Bool.h>
 #include <sstream>
 #include "../include/GUI/qnode.hpp"
+#include "MESSAGES/oee.h"
 
 /*****************************************************************************
 ** Namespaces
@@ -36,15 +37,32 @@ void QNode::getTotalOrders(int& tmp) {
 	tmp=QNode::totalOrdersCount;
 }
 
+int* QNode::getOEE() {
+	ROS_INFO("getOEE");
+	return QNode::OEEarray;
+}
+
 void QNode::setTotalOrders(int count) {
 	totalOrdersCount = count;
 }
 
+void QNode::setOEE(int A, int P, int Q, int OEE) {
+	OEEarray[0] = A;
+	OEEarray[1] = P;
+	OEEarray[2] = Q;
+	OEEarray[3] = OEE;
+}
 
-void QNode::TotalOrdersCallback(const std_msgs::Int64::ConstPtr& msg)
+void QNode::totalOrdersCallback(const std_msgs::Int64::ConstPtr& msg)
 {
 	setTotalOrders(msg->data);
 	ROS_INFO("Total orders incremented");
+}
+
+void QNode::getOEECallback(const MESSAGES::oee::ConstPtr& msg)
+{
+	setOEE(msg->availability,msg->performance,msg->quality,msg->oee);
+	ROS_INFO("Updated OEE numbers");
 }
 
 
@@ -69,7 +87,8 @@ bool QNode::init() {
 	}
 	ros::start(); // explicitly needed since our nodehandle is going out of scope.
     ros::NodeHandle h;
-    TotalOrdersSub = h.subscribe("/totalOrders", 10, &QNode::TotalOrdersCallback, this);
+    TotalOrdersSub = h.subscribe("/totalOrders", 10, &QNode::totalOrdersCallback, this);
+    OEESub = h.subscribe("/oeeInfo", 10, &QNode::getOEECallback, this);
     pauseMsg = h.advertise<std_msgs::Bool>("/systemPause", 10);
 	start();
 	return true;

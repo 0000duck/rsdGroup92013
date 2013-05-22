@@ -15,5 +15,6 @@
   <rosdep name="libqt4-dev"/>
   <depend package="qt_build"/>
   <depend package="roscpp"/>
+  <depend package="MESSAGES"/>
   <depend package="std_msgs"/>
 </package>

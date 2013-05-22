@@ -44,6 +44,9 @@ public Q_SLOTS:
 	** Auto-connections (connectSlotsByName())
 	*******************************************/
 	void on_pushButton_pause_clicked(bool check);
+	void on_pushButton_start_clicked(bool check);
+	void on_pushButton_stop_clicked(bool check);
+	void updateOEE();
 	void updateUpTime();
 	void updateTotalOrders();
     /******************************************

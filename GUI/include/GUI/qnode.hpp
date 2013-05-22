@@ -21,6 +21,7 @@
 #include <QThread>
 #include <QStringListModel>
 #include <std_msgs/Int64.h>
+#include "MESSAGES/oee.h"
 
 /*****************************************************************************
 ** Function declarations
@@ -42,12 +43,14 @@ public:
 	QNode(int argc, char** argv );
 	virtual ~QNode();
 	bool init();
-	bool init(const std::string &master_url, const std::string &host_url);
 	void run();
 	void PauseSystem();
 	void getTotalOrders(int& tmp);
+	int* getOEE();
 	void setTotalOrders(int count);
-	void TotalOrdersCallback(const std_msgs::Int64::ConstPtr& msg);
+	void setOEE(int A, int P, int Q, int OEE);
+	void totalOrdersCallback(const std_msgs::Int64::ConstPtr& msg);
+	void getOEECallback(const MESSAGES::oee::ConstPtr& msg);
 
 
 Q_SIGNALS:
@@ -56,11 +59,11 @@ Q_SIGNALS:
 private:
 	int init_argc;
 	int totalOrdersCount;
+	int OEEarray[4];		// [0-3]: A, P, Q, OEE
 	char** init_argv;
-	ros::Subscriber sub;
 	ros::Subscriber TotalOrdersSub;
+	ros::Subscriber OEESub;
 	ros::Publisher pauseMsg;
-    QStringListModel logging_model;
 };
 
 }  // namespace GUI
