@@ -24,11 +24,6 @@
 /*****************************************************************************
 ** Namespaces
 *****************************************************************************/
-int TotalOrders = 1;
-
-int getTotalOrders() {
-	return TotalOrders;
-}
 
 namespace GUI {
 
@@ -36,9 +31,19 @@ namespace GUI {
 /*****************************************************************************
 ** Implementation
 *****************************************************************************/
-void TotalOrdersCallback(const std_msgs::Int64::ConstPtr& msg)
+
+void QNode::getTotalOrders(int& tmp) {
+	tmp=QNode::totalOrdersCount;
+}
+
+void QNode::setTotalOrders(int count) {
+	totalOrdersCount = count;
+}
+
+
+void QNode::TotalOrdersCallback(const std_msgs::Int64::ConstPtr& msg)
 {
-	TotalOrders = msg->data;
+	setTotalOrders(msg->data);
 	ROS_INFO("Total orders incremented");
 }
 
@@ -46,6 +51,7 @@ void TotalOrdersCallback(const std_msgs::Int64::ConstPtr& msg)
 QNode::QNode(int argc, char** argv ) :
 	init_argc(argc),
 	init_argv(argv)
+
 	{}
 
 QNode::~QNode() {
@@ -63,7 +69,7 @@ bool QNode::init() {
 	}
 	ros::start(); // explicitly needed since our nodehandle is going out of scope.
     ros::NodeHandle h;
-    TotalOrdersSub = h.subscribe("TotalOrders", 10, TotalOrdersCallback);
+    TotalOrdersSub = h.subscribe("/totalOrders", 10, &QNode::TotalOrdersCallback, this);
     pauseMsg = h.advertise<std_msgs::Bool>("/systemPause", 10);
 	start();
 	return true;

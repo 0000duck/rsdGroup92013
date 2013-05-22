@@ -3,6 +3,8 @@
 import roslib; roslib.load_manifest('ORDER_SYSTEM')
 import rospy
 from MESSAGES.msg import order
+from std_msgs.msg import Bool
+from std_msgs.msg import Int32
 
 import sys                              #for exit
 import xml.etree.ElementTree as xml     # XML parsing
@@ -23,8 +25,9 @@ detectedBricks = [2,2,2]        # Red, Blue, Yellow (bricks)
 ROSDetectedBricks = []
 DetectionsCounter = -1
 tempCounter = -1
+totalOrdersDone = 0;
 base_url = 'http://192.168.10.100/'
-bestOrder_dict = {0: {'orderName':'None','orderState':"IDLE",'orderDone':True,'slider':3, 'bricks':0,'ticket':0,'redTotal':0,'blueTotal':0,'yellowTotal':0,'redPicked':0,'bluePicked':0,'yellowPicked':0,'redNeeded':0,'blueNeeded':0,'yellowNeeded':0},        1: {'orderName':'None','orderState':"IDLE",'orderDone':True,'slider':3, 'bricks':0,'ticket':0,'redTotal':0,'blueTotal':0,'yellowTotal':0,'redPicked':0,'bluePicked':0,'yellowPicked':0,'redNeeded':0,'blueNeeded':0,'yellowNeeded':0}}
+bestOrder_dict = {0: {'orderName':'None','orderState':"IDLE",'orderDone':True,'slider':-1, 'bricks':0,'ticket':0,'redTotal':0,'blueTotal':0,'yellowTotal':0,'redPicked':0,'bluePicked':0,'yellowPicked':0,'redNeeded':0,'blueNeeded':0,'yellowNeeded':0},        1: {'orderName':'None','orderState':"IDLE",'orderDone':True,'slider':-1, 'bricks':0,'ticket':0,'redTotal':0,'blueTotal':0,'yellowTotal':0,'redPicked':0,'bluePicked':0,'yellowPicked':0,'redNeeded':0,'blueNeeded':0,'yellowNeeded':0}}
 slider_dict = {0:{'busy':False,'orderName':'None'}, 1:{'busy':False,'orderName':'None'}}
 orderProcess = True
 ################################################################################################### 
@@ -315,7 +318,8 @@ def logMsg(event, comment):
     RESTlog = requests.post(base_url + 'log', data=log)
     if(int(RESTlog.status_code) == 201):
         print '\n ################################ \t Log successfully sent: \t ################################################## \nEvent: ' + event + '\nComment: ' + comment + '\n###########################################################################################################################'
-    
+    else
+        print 'Error sending log!'
     return log
 
 
@@ -336,6 +340,22 @@ def publish(bestOrder):
     pub_msg.slider = bestOrder['slider']
     global pub
     pub.publish(pub_msg)
+ 
+
+def publishOrderBegun():
+    pubBegunMsg = Bool()
+    pubBegunMsg.header.stamp = rospy.get_rostime()
+    pubBegunMsg.data = True
+    global pubOrderBegun
+    pubOrderBegun.publish(pubBegunMsg)
+    
+    
+def publishTotalOrders(totalOrdersDone):
+    pubTotalMsg = Int32()
+    pubTotalMsg.header.stamp = rospy.get_rostime()
+    pubTotalMsg.data = totalOrdersDone
+    global pubTotalOrders
+    pubTotalOrders.publish(pubTotalMsg)
     
 
 
@@ -404,8 +424,10 @@ def main():
 #--------------------------------------- Get order state ------------------------------------------ 
 ###################################################################################################                
         if(bestOrder[orderProcess]['orderState'] =="GET_ORDER" and tempCounter >= 0):
-            print 'ROS detect array: ' + str(ROSDetectedBricks[tempCounter])
             bestOrder[orderProcess] = getOrders(requestedOrders, ROSDetectedBricks[tempCounter],orderProcess)   
+            
+            logMsg('NEW_ORDER', bestOrder[orderProcess]['orderName'])
+            publishOrderBegun()
             
             printOrderSpecs(bestOrder[orderProcess])
             
@@ -461,8 +483,10 @@ def main():
         if(bestOrder[orderProcess]['orderState'] =="ORDER_DONE"):
             #deleteOrder(bestOrder[slider]['orderName'],bestOrder[slider]['ticket'] )
             sliderStatus = resetSlider(sliderStatus)
-            bestOrder[orderProcess]['slider'] = 3                           # To indicate that no slider is assigned
+            bestOrder[orderProcess]['slider'] = -1                           # To indicate that no slider is assigned
             logMsg('COMPLETED', bestOrder[orderProcess]['orderName'])
+            totalOrdersDone = totalOrdersDone + 1
+            publishTotalOrders(totalOrdersDone)
             # Signal Vision system that the order is done. Wait for new detectedBricks
             bestOrder[orderProcess]['orderState'] = "IDLE"
 
@@ -472,5 +496,7 @@ def main():
 
 if __name__ == '__main__':
    pub = rospy.Publisher('/chosenOrder', order)
+   pubTotalOrders = rospy.Publisher('/totalOrders', Int32)
+   pubOrderBegun = rospy.Publisher('/orderBegun', Bool)
    rospy.Subscriber("/visDetected", order, visCallback)
    main()
