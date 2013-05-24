@@ -102,54 +102,37 @@ int main(int argc, char *argv[])
 	std_msgs::String message;
 //	message.data="0";
 	///readyPub.publish(message);
-	bool hackEnable = true;
-	double timeHack= 0;
+
 
 	while (ros::ok())
 	{
-		if(sysPause==false){
-			if(conveyerStopped==1){
-				if(!list1.empty()){
-					if(ready==1){
-						message.data="0"; // conveyer may not move
-						readyPub.publish(message);
-						string temp = list1.back();
-						list1.pop_back();
-						temp.append("\n");
-						const char* msg = temp.c_str();
-						n = write(newsockfd,msg,strlen(msg));
+		if(conveyerStopped==1 && (sysPause==false)){
+			if(!list1.empty()){
+				if(ready==1){
+					message.data="0"; // conveyer may not move
+					readyPub.publish(message);
+					string temp = list1.back();
+					list1.pop_back();
+					temp.append("\n");
+					const char* msg = temp.c_str();
+					n = write(newsockfd,msg,strlen(msg));
 
-						if (n < 0) error("ERROR writing to socket");
+					if (n < 0) error("ERROR writing to socket");
 
-						ready=0;
-					}
-				}
-				else{
-					conveyerStopped=0;
-					if(ready==2){
-						timeHack=ros::Time::now().toSec();
-						cout << timeHack << endl;
-						message.data="1"; // conveyer may move
-						readyPub.publish(message);
-					}
+					ready=0;
 				}
 			}
-			n=read(newsockfd,buffer,5);
-
-			ready=atoi(buffer);
-			//cout << "end: " << ros::Time::now() << endl;
-
-			/*if(ros::Time::now().toSec()-timeHack > 10){
-				cout << ros::Time::now().toSec()-timeHack << endl;
-				message.data="1"; // conveyer may move
-				readyPub.publish(message);
-				timeHack=ros::Time::now().toSec();
-			}*/
+			else{
+				conveyerStopped=0;
+				if(ready==2){
+					message.data="1"; // conveyer may move
+					readyPub.publish(message);
+				}
+			}
 		}
-		else{
-			timeHack=ros::Time::now().toSec();
-			ready=1;
-		}
+		n=read(newsockfd,buffer,5);
+
+		ready=atoi(buffer);
 
 		ros::spinOnce();
 		loop_rate.sleep();
