@@ -159,6 +159,8 @@ void getBricks(Mat& imgEdge, Mat& imgROI, ros::Publisher seenPub){
 					}
 				cout << "Color: " <<color << " Center (m): " <<xPos <<","<< yPos << " Angle (rad): " << angle << endl;
 				if(angle<PI/2 && angle>-PI/2){
+					if(angle>PI/4)
+						angle-=PI/2;
 					temp.s=constructCommand(xPos, yPos, angle, BLUE,slider);
 					temp.color=BLUE;
 					list1.push_back(temp);

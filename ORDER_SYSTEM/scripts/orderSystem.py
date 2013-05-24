@@ -150,7 +150,7 @@ def getOrders(numberOfOrders,detectedBricks,orderProcess):
             orderReceipt = requests.put(base_url + serverPath(orderNames[x]))
             bestOrder_dict['ticket'] = parseOrderReceipt(orderReceipt.content)
             print '\n ################################ \t An optimal order was found: ' + orderNames[x] + ' with ticket: ' + bestOrder_dict['ticket'] + '\t ##################'
-            bestOrder_dict['orderState'] = "ORDER_DONE"
+            bestOrder_dict['orderState'] = "NE"
             return bestOrder_dict
         else:
            
@@ -318,7 +318,7 @@ def logMsg(event, comment):
     RESTlog = requests.post(base_url + 'log', data=log)
     if(int(RESTlog.status_code) == 201):
         print '\n ################################ \t Log successfully sent: \t ################################################## \nEvent: ' + event + '\nComment: ' + comment + '\n###########################################################################################################################'
-    else
+    else:
         print 'Error sending log!'
     return log
 
@@ -427,7 +427,7 @@ def main():
             bestOrder[orderProcess] = getOrders(requestedOrders, ROSDetectedBricks[tempCounter],orderProcess)   
             
             logMsg('NEW_ORDER', bestOrder[orderProcess]['orderName'])
-            publishOrderBegun()
+            #publishOrderBegun()
             
             printOrderSpecs(bestOrder[orderProcess])
             
@@ -485,8 +485,8 @@ def main():
             sliderStatus = resetSlider(sliderStatus)
             bestOrder[orderProcess]['slider'] = -1                           # To indicate that no slider is assigned
             logMsg('COMPLETED', bestOrder[orderProcess]['orderName'])
-            totalOrdersDone = totalOrdersDone + 1
-            publishTotalOrders(totalOrdersDone)
+            #totalOrdersDone = totalOrdersDone + 1
+            #publishTotalOrders(totalOrdersDone)
             # Signal Vision system that the order is done. Wait for new detectedBricks
             bestOrder[orderProcess]['orderState'] = "IDLE"
 
@@ -496,7 +496,7 @@ def main():
 
 if __name__ == '__main__':
    pub = rospy.Publisher('/chosenOrder', order)
-   pubTotalOrders = rospy.Publisher('/totalOrders', Int32)
-   pubOrderBegun = rospy.Publisher('/orderBegun', Bool)
+   #pubTotalOrders = rospy.Publisher('/totalOrders', Int32)
+   #pubOrderBegun = rospy.Publisher('/orderBegun', Bool)
    rospy.Subscriber("/visDetected", order, visCallback)
    main()

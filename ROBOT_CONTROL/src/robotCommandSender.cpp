@@ -1,6 +1,7 @@
 // rosnode to send commands to robot
 #include "ros/ros.h"
 #include "std_msgs/String.h"
+#include "std_msgs/Bool.h"
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,6 +17,7 @@ using namespace std;
 
 vector<string> list1;
 int conveyerStopped = 1;
+bool sysPause = false;
 
 void error(const char *msg)
 {
@@ -34,6 +36,11 @@ void convStopCallback(const std_msgs::String::ConstPtr& msg)
 	conveyerStopped=atoi(msg->data.c_str());
 }
 
+void pauseCallback(const std_msgs::Bool::ConstPtr& msg)
+{
+	sysPause=msg->data;
+}
+
 int main(int argc, char *argv[])
 {
 	ros::init(argc, argv, "robotCommandSender");
@@ -41,7 +48,8 @@ int main(int argc, char *argv[])
  	ros::Publisher readyPub = h.advertise<std_msgs::String>("/robotReady", 10);
  	ros::Subscriber sub = h.subscribe("/newConfig", 10, configCallback);
  	ros::Subscriber convStopSub = h.subscribe("/conveyerStopped", 10, convStopCallback);
-	
+ 	ros::Subscriber pauSub = h.subscribe("/systemPause", 10, pauseCallback);
+
 	int sockfd, newsockfd, portno;
     socklen_t clilen;
     char buffer[256];
@@ -99,89 +107,54 @@ int main(int argc, char *argv[])
 
 	while (ros::ok())
 	{
-		if(conveyerStopped==1){
-			if(!list1.empty()){
-				if(ready==1){
-					message.data="0"; // conveyer may not move
-					readyPub.publish(message);
-					string temp = list1.back();
-					list1.pop_back();
-					temp.append("\n");
-					const char* msg = temp.c_str();
-					n = write(newsockfd,msg,strlen(msg));
+		if(sysPause==false){
+			if(conveyerStopped==1){
+				if(!list1.empty()){
+					if(ready==1){
+						message.data="0"; // conveyer may not move
+						readyPub.publish(message);
+						string temp = list1.back();
+						list1.pop_back();
+						temp.append("\n");
+						const char* msg = temp.c_str();
+						n = write(newsockfd,msg,strlen(msg));
 
-					if (n < 0) error("ERROR writing to socket");
+						if (n < 0) error("ERROR writing to socket");
 
-					ready=0;
+						ready=0;
+					}
+				}
+				else{
+					conveyerStopped=0;
+					if(ready==2){
+						timeHack=ros::Time::now().toSec();
+						cout << timeHack << endl;
+						message.data="1"; // conveyer may move
+						readyPub.publish(message);
+					}
 				}
 			}
-			else{
-				conveyerStopped=0;
-				if(ready==2){
-					timeHack=ros::Time::now().toSec();
-					cout << timeHack << endl;
-					message.data="1"; // conveyer may move
-					readyPub.publish(message);
-				}
-			}
+			n=read(newsockfd,buffer,5);
+
+			ready=atoi(buffer);
+			//cout << "end: " << ros::Time::now() << endl;
+
+			/*if(ros::Time::now().toSec()-timeHack > 10){
+				cout << ros::Time::now().toSec()-timeHack << endl;
+				message.data="1"; // conveyer may move
+				readyPub.publish(message);
+				timeHack=ros::Time::now().toSec();
+			}*/
 		}
-		n=read(newsockfd,buffer,5);
-
-		ready=atoi(buffer);
-		//cout << "end: " << ros::Time::now() << endl;
-
-		if(ros::Time::now().toSec()-timeHack > 10){
-			cout << ros::Time::now().toSec()-timeHack << endl;
-			message.data="1"; // conveyer may move
-			readyPub.publish(message);
+		else{
 			timeHack=ros::Time::now().toSec();
+			ready=1;
 		}
 
 		ros::spinOnce();
 		loop_rate.sleep();
 	}
-    /*while (ros::ok())
-    {
-    	cout << "1" << endl;
-    	//cout << "start: "  << ros::Time::now() << endl;
-    	if(conveyerStopped==1){
-    	  	cout << "2" << endl;
-			if(ready==1){
 
-				cout << "3" << endl;
-				if(!list1.empty()){
-				  	cout << "4" << endl;
-					message.data="0"; // conveyer may not move
-					string temp = list1.back();
-					list1.pop_back();
-					temp.append("\n");
-					const char* msg = temp.c_str();
-					n = write(newsockfd,msg,strlen(msg));
-				  	cout << "5" << endl;
-					if (n < 0) error("ERROR writing to socket");
-
-					ready=0;
-				}
-				else{
-				  	cout << "6" << endl;
-					cout << "list empty" <<endl;
-					//conveyerStopped=0;
-					message.data="1"; // conveyer may move
-				}
-			}
-
-
-    	}
-      	cout << "7" << endl;
-    	readyPub.publish(message);
-		n=read(newsockfd,buffer,5);
-	  	cout << "8" << endl;
-		ready=atoi(buffer);
-		//cout << "end: " << ros::Time::now() << endl;
-		ros::spinOnce();
-		loop_rate.sleep();
-	  	cout << "9" << endl;
-    }*/
 
 
     cout << "a" << endl;
