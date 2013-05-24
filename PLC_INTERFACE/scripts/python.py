@@ -2,6 +2,7 @@
 import roslib; roslib.load_manifest('PLC_INTERFACE')
 import rospy
 from std_msgs.msg import String
+from std_msgs.msg import Int8
 import time
 import serial
 
@@ -26,22 +27,17 @@ def write():
 	if((robTemp=="0") and (visTemp=="0")):
 		ser.write("sto")
 
-def robCallback(data):
-	signal = data.data
-	global robTemp
-	if(signal!=robTemp):
-		robTemp=signal
-		write()
+def stateCallback(data):
+	if(data.data==0):
+		ser.write("gre")
+	elif(data.data==1):
+		ser.write("yel")
+	elif(data.data==2):
+		ser.write("red")
+	elif(data.data==4):
+		ser.write("off")
+	time.sleep(0.2)
 		
-#===============================================================================
-# def visCallback(data):
-# 	signal = data.data
-# 	global visTemp
-# 	print signal + ' , ' + visTemp
-# 	if(signal!=visTemp):
-# 		visTemp=signal
-# 		write()
-#===============================================================================
 def visCallback(data):
 	if((data.data=="1")):
 		ser.write("sta")
@@ -55,10 +51,12 @@ def visCallback(data):
 		pub_msg = String()
    		pub_msg.data = "1"
    		pub.publish(pub_msg)
+   		time.sleep(0.2)
+
 
 def main():
 	rospy.init_node('plcControl', anonymous=True)
-	#rospy.Subscriber("robotReady", String, robCallback)
+	rospy.Subscriber("/lightState", Int8, stateCallback)
 	rospy.Subscriber("/visReady", String, visCallback)
 	
 	global ser
