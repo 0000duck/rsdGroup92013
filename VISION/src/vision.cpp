@@ -9,6 +9,12 @@
 #include <string>
 #include <strstream>
 
+
+
+#define CAPTURE_DEVICE	0
+
+
+
 #define PI 3.14159265359
 #define scale 0.000195 //Conversion from pixel to meter in the image. Calculated by actual size in meters of the image divided by the resolution
 #define offsetX -0.125 //Move the origo (0,0) position from the upper left corner to the center of the image
@@ -22,6 +28,7 @@
 #define RED 0
 #define BLUE 1
 #define YELLOW 2
+
 
 using namespace std;
 using namespace cv;
@@ -338,17 +345,27 @@ int main(int argc, char *argv[])
  	ros::Subscriber pickup = h.subscribe("/chosenOrder", 10, chosenOCallback);
  	ros::Subscriber robRSub = h.subscribe("/robotReady", 10, robRCallback);
  	ros::Subscriber convStopSub = h.subscribe("/conveyerStopped", 10, convStopCallback);
+	
+ 	std::string device;
+ 	if(CAPTURE_DEVICE == 1)
+ 	{
+ 		device = "--device=\"/dev/video1\"";
+ 	}
+ 	else if(CAPTURE_DEVICE == 0)
+ 	{
+ 		device = "--device=\"/dev/video0\"";
+ 	}
 
-	system("v4l2-ctl --set-ctrl white_balance_temperature_auto=0");
-	system("v4l2-ctl --set-ctrl brightness=50");
-	system("v4l2-ctl --set-ctrl contrast=95");
-	system("v4l2-ctl --set-ctrl saturation=100");
-	system("v4l2-ctl --set-ctrl hue=0");
-	system("v4l2-ctl --set-ctrl gamma=48");
-	system("v4l2-ctl --set-ctrl white_balance_temperature=2800");
-	system("v4l2-ctl --set-ctrl sharpness=7");
-	system("v4l2-ctl --set-ctrl backlight_compensation=2");
-	system("v4l2-ctl --set-ctrl exposure_auto=1");
+	system(("v4l2-ctl " + device + " --set-ctrl white_balance_temperature_auto=0").c_str());
+	system(("v4l2-ctl " + device + " --set-ctrl brightness=50").c_str());
+	system(("v4l2-ctl " + device + " --set-ctrl contrast=95").c_str());
+	system(("v4l2-ctl " + device + " --set-ctrl saturation=100").c_str());
+	system(("v4l2-ctl " + device + " --set-ctrl hue=0").c_str());
+	system(("v4l2-ctl " + device + " --set-ctrl gamma=48").c_str());
+	system(("v4l2-ctl " + device + " --set-ctrl white_balance_temperature=2800").c_str());
+	system(("v4l2-ctl " + device + " --set-ctrl sharpness=7").c_str());
+	system(("v4l2-ctl " + device + " --set-ctrl backlight_compensation=2").c_str());
+	system(("v4l2-ctl " + device + " --set-ctrl exposure_auto=1").c_str());
 
 	//ros::Subscriber sub = h.subscribe("newConfig", 10, configCallback);
 
@@ -357,7 +374,7 @@ int main(int argc, char *argv[])
 	ros::Rate loop_rate(10);
 	sleep(3);
 	Mat frame;
-	VideoCapture cap(-1); //Setup capturing device
+	VideoCapture cap(CAPTURE_DEVICE); //Setup capturing device	- In ubuntu: Install guvcview  and run "uvcdynctrl -l"
 	if(!cap.isOpened())  // check if we succeeded
 		return -1;
 	cap.set(CV_CAP_PROP_FRAME_WIDTH, 1280); //Set resolution to 1280x720

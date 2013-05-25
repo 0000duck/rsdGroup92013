@@ -20,7 +20,7 @@
 #include <string>
 #include <QThread>
 #include <QStringListModel>
-#include <std_msgs/Int64.h>
+#include <std_msgs/Int32.h>
 #include "MESSAGES/oee.h"
 
 /*****************************************************************************
@@ -49,7 +49,7 @@ public:
 	int* getOEE();
 	void setTotalOrders(int count);
 	void setOEE(int A, int P, int Q, int OEE);
-	void totalOrdersCallback(const std_msgs::Int64::ConstPtr& msg);
+	void totalOrdersCallback(const std_msgs::Int32::ConstPtr& msg);
 	void getOEECallback(const MESSAGES::oee::ConstPtr& msg);
 
 

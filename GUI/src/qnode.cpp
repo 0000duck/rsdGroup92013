@@ -14,7 +14,7 @@
 #include <ros/network.h>
 #include <string>
 #include <vector>
-#include <std_msgs/Int64.h>
+#include <std_msgs/Int32.h>
 #include <cstdlib>
 #include <std_msgs/String.h>
 #include <std_msgs/Bool.h>
@@ -38,7 +38,6 @@ void QNode::getTotalOrders(int& tmp) {
 }
 
 int* QNode::getOEE() {
-	ROS_INFO("getOEE");
 	return QNode::OEEarray;
 }
 
@@ -53,16 +52,14 @@ void QNode::setOEE(int A, int P, int Q, int OEE) {
 	OEEarray[3] = OEE;
 }
 
-void QNode::totalOrdersCallback(const std_msgs::Int64::ConstPtr& msg)
+void QNode::totalOrdersCallback(const std_msgs::Int32::ConstPtr& msg)
 {
 	setTotalOrders(msg->data);
-	ROS_INFO("Total orders incremented");
 }
 
 void QNode::getOEECallback(const MESSAGES::oee::ConstPtr& msg)
 {
 	setOEE(msg->availability,msg->performance,msg->quality,msg->oee);
-	ROS_INFO("Updated OEE numbers");
 }
 
 
