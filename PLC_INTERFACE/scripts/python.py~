@@ -2,6 +2,7 @@
 import roslib; roslib.load_manifest('PLC_INTERFACE')
 import rospy
 from std_msgs.msg import String
+from std_msgs.msg import Int8
 import time
 import serial
 
@@ -10,32 +11,54 @@ robTemp = "0"
 visTemp = "0"
 
 def write():
-	if((robTemp=="1") and (visTemp=="1")):
+	if((visTemp=="1")):
 		ser.write("sta")
-		time.sleep(0.8)
+		pub_msg = String()
+   		pub_msg.data = "0"
+   		global pub
+   		pub.publish(pub_msg)
+		time.sleep(2*0.80)
 		ser.write("sto")
+		time.sleep(1)
+		pub_msg = String()
+   		pub_msg.data = "1"
+   		pub.publish(pub_msg)
+		
 	if((robTemp=="0") and (visTemp=="0")):
 		ser.write("sto")
 
-def robCallback(data):
-	signal = data.data
-	global robTemp
-	if(signal!=robTemp):
-		robTemp=signal
-		write()
+def stateCallback(data):
+	if(data.data==0):
+		ser.write("gre")
+	elif(data.data==1):
+		ser.write("yel")
+	elif(data.data==2):
+		ser.write("red")
+	elif(data.data==4):
+		ser.write("off")
+	time.sleep(0.2)
 		
 def visCallback(data):
-	signal = data.data
-	global visTemp
-	if(signal!=visTemp):
-		visTemp=signal
-		write()
-		
+	if((data.data=="1")):
+		ser.write("sta")
+		pub_msg = String()
+   		pub_msg.data = "0"
+   		global pub
+   		pub.publish(pub_msg)
+		time.sleep(2*0.80)
+		ser.write("sto")
+		time.sleep(1)
+		pub_msg = String()
+   		pub_msg.data = "1"
+   		pub.publish(pub_msg)
+   		time.sleep(0.2)
+
 
 def main():
 	rospy.init_node('plcControl', anonymous=True)
-	rospy.Subscriber("robotReady", String, robCallback)
-	rospy.Subscriber("visReady", String, visCallback)
+	rospy.Subscriber("/lightState", Int8, stateCallback)
+	rospy.Subscriber("/visReady", String, visCallback)
+	
 	global ser
 	ser = serial.Serial('/dev/ttyUSB0', 19200, timeout=1)
 	
@@ -67,4 +90,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+	pub = rospy.Publisher("/conveyerStopped", String)
+	main()

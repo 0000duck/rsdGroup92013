@@ -21,6 +21,7 @@
 #include <QThread>
 #include <QStringListModel>
 #include <std_msgs/Int32.h>
+#include <std_msgs/Int8.h>
 #include "MESSAGES/oee.h"
 
 /*****************************************************************************
@@ -51,6 +52,9 @@ public:
 	void setOEE(int A, int P, int Q, int OEE);
 	void totalOrdersCallback(const std_msgs::Int32::ConstPtr& msg);
 	void getOEECallback(const MESSAGES::oee::ConstPtr& msg);
+	void startPub();
+	void stopPub();
+	bool pauseTemp;
 
 
 Q_SIGNALS:
@@ -64,6 +68,7 @@ private:
 	ros::Subscriber TotalOrdersSub;
 	ros::Subscriber OEESub;
 	ros::Publisher pauseMsg;
+	ros::Publisher lightState;
 };
 
 }  // namespace GUI

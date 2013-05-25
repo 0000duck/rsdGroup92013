@@ -29,11 +29,11 @@ def write():
 
 def stateCallback(data):
 	if(data.data==0):
-		ser.write("gre")
+		ser.write("gre") # actually red
 	elif(data.data==1):
 		ser.write("yel")
 	elif(data.data==2):
-		ser.write("red")
+		ser.write("red") # actually green
 	elif(data.data==4):
 		ser.write("off")
 	time.sleep(0.2)

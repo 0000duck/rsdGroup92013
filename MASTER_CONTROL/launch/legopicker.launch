@@ -5,7 +5,7 @@
 	</group>
 
 	<group ns="ROBOT_CONTROL">
-		<node pkg="ROBOT_CONTROL" name="robot" type="robotCommandSender" args="1353"> </node>
+		<node pkg="ROBOT_CONTROL" name="robot" type="robotCommandSender" args="1372"> </node>
 	</group>
 
 	<group ns="VISION">

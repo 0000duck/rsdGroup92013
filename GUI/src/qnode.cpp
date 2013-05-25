@@ -15,6 +15,7 @@
 #include <string>
 #include <vector>
 #include <std_msgs/Int32.h>
+#include <std_msgs/Int8.h>
 #include <cstdlib>
 #include <std_msgs/String.h>
 #include <std_msgs/Bool.h>
@@ -87,6 +88,7 @@ bool QNode::init() {
     TotalOrdersSub = h.subscribe("/totalOrders", 10, &QNode::totalOrdersCallback, this);
     OEESub = h.subscribe("/oeeInfo", 10, &QNode::getOEECallback, this);
     pauseMsg = h.advertise<std_msgs::Bool>("/systemPause", 10);
+    lightState = h.advertise<std_msgs::Int8>("/lightState", 10);
 	start();
 	return true;
 }
@@ -107,15 +109,56 @@ void QNode::run() {
 
 void QNode::PauseSystem() {
 	std_msgs::Bool pauseSig;
-	pauseSig.data = true;
-	if(!pauseMsg)
+	std_msgs::Int8 light;
+	if(pauseTemp==false){
+		light.data = 1;
+		pauseSig.data = true;
+		pauseTemp=true;
+	}
+	else{
+		light.data = 2;
+		pauseSig.data = false;
+		pauseTemp=false;
+	}
+
+	pauseMsg.publish(pauseSig);
+	lightState.publish(light);
+	/*if(!pauseMsg)
 	{
 		ROS_WARN("Publisher invalid!");
 	}
 	else
 	{
 		pauseMsg.publish(pauseSig);
+	}*/
+}
+
+void QNode::startPub() {
+	std_msgs::Int8 light;
+	light.data = 2; // green
+	if(!lightState)
+	{
+		ROS_WARN("Publisher invalid!");
 	}
+	else
+	{
+		lightState.publish(light);
+	}
+
+}
+
+void QNode::stopPub() {
+	std_msgs::Int8 light;
+	light.data = 0; //red
+	if(!lightState)
+	{
+		ROS_WARN("Publisher invalid!");
+	}
+	else
+	{
+		lightState.publish(light);
+	}
+
 }
 
 

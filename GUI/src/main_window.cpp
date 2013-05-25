@@ -69,24 +69,27 @@ void MainWindow::on_pushButton_start_clicked(bool check) {
 	ROS_INFO("System started!");
 	updateSystemState("RUNNING");
 	running = true;
-	//system("roslaunch MASTER_CONTROL legopicker.launch &");
+    qnode.pauseTemp=false;
+	system("roslaunch MASTER_CONTROL legopicker.launch &");
 	ss = 0;
 	mm = 0;
 	hh = 0;
 	updateTime.setHMS(hh,mm,ss,0);
 	ui.lcd_up->display(updateTime.toString());
+	qnode.startPub();
 	time = QTime::currentTime();
 	timer->start(1000);
+
 }
 
 
 void MainWindow::on_pushButton_pause_clicked(bool check) {
-
 	if(pause == true) {
 		ROS_INFO("System resumed!");
 		pause = false;
 		updateSystemState("RUNNING");
 		timer->start();
+		qnode.PauseSystem();
 	}
 	else {
 		ROS_INFO("System paused!");
@@ -105,6 +108,7 @@ void MainWindow::on_pushButton_stop_clicked(bool check) {
 	timer->stop();
 	updateSystemState("STOPPED");
 	system("killall roslaunch");
+	qnode.stopPub();
 }
 
 void MainWindow::updateOEE() {
@@ -153,7 +157,7 @@ void MainWindow::updateUpTime() {
 
 void MainWindow::updateSystemState(std::string state) {
 	ui.label_state->setText(QString::fromAscii(state.data(),state.size()));
-	if(state == "RUNNING")
+	if(state == "STOPPED")
 	{
 		ui.graphics_red->setStyleSheet("background-color: rgb(255,0,0);");
 		ui.graphics_yellow->setStyleSheet("background-color: white;");
@@ -165,7 +169,7 @@ void MainWindow::updateSystemState(std::string state) {
 		ui.graphics_red->setStyleSheet("background-color: white;");
 		ui.graphics_green->setStyleSheet("background-color: white;");
 	}
-	if(state == "STOPPED")
+	if(state == "RUNNING")
 	{
 		ui.graphics_green->setStyleSheet("background-color: rgb(0,255,0);");
 		ui.graphics_yellow->setStyleSheet("background-color: white;");
