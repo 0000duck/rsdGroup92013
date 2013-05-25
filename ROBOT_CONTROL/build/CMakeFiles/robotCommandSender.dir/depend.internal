@@ -57,4 +57,5 @@ CMakeFiles/robotCommandSender.dir/src/robotCommandSender.cpp.o
  /opt/ros/groovy/include/ros/wall_timer.h
  /opt/ros/groovy/include/ros/wall_timer_options.h
  /opt/ros/groovy/include/rosconsole/macros_generated.h
+ /opt/ros/groovy/include/std_msgs/Bool.h
  /opt/ros/groovy/include/std_msgs/String.h

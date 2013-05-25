@@ -153,7 +153,7 @@ def getOrders(numberOfOrders,detectedBricks,orderProcess):
             bestOrder_dict['timeStamp'] = rospy.get_time();
             bestOrder_dict['ticket'] = parseOrderReceipt(orderReceipt.content)
             print '\n ################################ \t An optimal order was found: ' + orderNames[x] + ' with ticket: ' + bestOrder_dict['ticket'] + '\t ##################'
-            bestOrder_dict['orderState'] = "ORDER_DONE"
+            bestOrder_dict['orderState'] = "NE"
             return bestOrder_dict
         else:
            
@@ -448,7 +448,7 @@ def main():
             bestOrder[orderProcess] = getOrders(requestedOrders, ROSDetectedBricks[tempCounter],orderProcess)   
             
             logMsg('NEW_ORDER', bestOrder[orderProcess]['orderName'])
-            publishOrderBegun()
+            #publishOrderBegun()
             
             printOrderSpecs(bestOrder[orderProcess])
             
@@ -527,7 +527,7 @@ def main():
 
 if __name__ == '__main__':
    pub = rospy.Publisher('/chosenOrder', order)
-   pubTotalOrders = rospy.Publisher('/totalOrders', Int32)
-   pubOrderBegun = rospy.Publisher('/orderBegun', Bool)
+   #pubTotalOrders = rospy.Publisher('/totalOrders', Int32)
+   #pubOrderBegun = rospy.Publisher('/orderBegun', Bool)
    rospy.Subscriber("/visDetected", order, visCallback)
    main()
