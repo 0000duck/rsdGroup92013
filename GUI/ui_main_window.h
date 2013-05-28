@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'main_window.ui'
 **
-** Created: Sat May 25 15:49:41 2013
+** Created: Mon May 27 15:43:48 2013
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -88,6 +88,61 @@ public:
     QPushButton *pushButton_start;
     QPushButton *pushButton_pause;
     QPushButton *pushButton_stop;
+    QWidget *verticalLayoutWidget;
+    QVBoxLayout *verticalLayout_3;
+    QHBoxLayout *horizontalLayout_2;
+    QHBoxLayout *horizontalLayout_16;
+    QHBoxLayout *horizontalLayout_26;
+    QLabel *label_10;
+    QHBoxLayout *horizontalLayout_27;
+    QLabel *label_order1;
+    QHBoxLayout *horizontalLayout_17;
+    QHBoxLayout *horizontalLayout_28;
+    QLabel *label_12;
+    QHBoxLayout *horizontalLayout_29;
+    QLCDNumber *lcd_time1;
+    QHBoxLayout *horizontalLayout_18;
+    QHBoxLayout *horizontalLayout_30;
+    QLabel *label_13;
+    QHBoxLayout *horizontalLayout_32;
+    QLCDNumber *lcd_red1;
+    QHBoxLayout *horizontalLayout_19;
+    QHBoxLayout *horizontalLayout_33;
+    QLabel *label_14;
+    QHBoxLayout *horizontalLayout_34;
+    QLCDNumber *lcd_blue1;
+    QHBoxLayout *horizontalLayout_20;
+    QHBoxLayout *horizontalLayout_35;
+    QLabel *label_15;
+    QHBoxLayout *horizontalLayout_36;
+    QLCDNumber *lcd_yellow1;
+    QWidget *verticalLayoutWidget_3;
+    QVBoxLayout *verticalLayout_4;
+    QHBoxLayout *horizontalLayout_21;
+    QHBoxLayout *horizontalLayout_37;
+    QLabel *label_11;
+    QHBoxLayout *horizontalLayout_38;
+    QLabel *label_order2;
+    QHBoxLayout *horizontalLayout_22;
+    QHBoxLayout *horizontalLayout_39;
+    QLabel *label_16;
+    QHBoxLayout *horizontalLayout_40;
+    QLCDNumber *lcd_time2;
+    QHBoxLayout *horizontalLayout_23;
+    QHBoxLayout *horizontalLayout_41;
+    QLabel *label_17;
+    QHBoxLayout *horizontalLayout_42;
+    QLCDNumber *lcd_red2;
+    QHBoxLayout *horizontalLayout_24;
+    QHBoxLayout *horizontalLayout_43;
+    QLabel *label_18;
+    QHBoxLayout *horizontalLayout_44;
+    QLCDNumber *lcd_blue2;
+    QHBoxLayout *horizontalLayout_25;
+    QHBoxLayout *horizontalLayout_45;
+    QLabel *label_19;
+    QHBoxLayout *horizontalLayout_46;
+    QLCDNumber *lcd_yellow2;
     QMenuBar *menubar;
     QMenu *menu_File;
     QStatusBar *statusbar;
@@ -96,7 +151,7 @@ public:
     {
         if (MainWindowDesign->objectName().isEmpty())
             MainWindowDesign->setObjectName(QString::fromUtf8("MainWindowDesign"));
-        MainWindowDesign->resize(886, 528);
+        MainWindowDesign->resize(691, 677);
         MainWindowDesign->setMouseTracking(false);
         QIcon icon;
         icon.addFile(QString::fromUtf8(":/images/icon.png"), QSize(), QIcon::Normal, QIcon::Off);
@@ -167,7 +222,7 @@ public:
 
         horizontalLayoutWidget_6 = new QWidget(frame_2);
         horizontalLayoutWidget_6->setObjectName(QString::fromUtf8("horizontalLayoutWidget_6"));
-        horizontalLayoutWidget_6->setGeometry(QRect(300, 150, 361, 51));
+        horizontalLayoutWidget_6->setGeometry(QRect(300, 119, 361, 81));
         horizontalLayout_6 = new QHBoxLayout(horizontalLayoutWidget_6);
         horizontalLayout_6->setObjectName(QString::fromUtf8("horizontalLayout_6"));
         horizontalLayout_6->setContentsMargins(0, 0, 0, 0);
@@ -208,7 +263,7 @@ public:
 
         gridLayoutWidget_2 = new QWidget(frame_2);
         gridLayoutWidget_2->setObjectName(QString::fromUtf8("gridLayoutWidget_2"));
-        gridLayoutWidget_2->setGeometry(QRect(300, 10, 361, 127));
+        gridLayoutWidget_2->setGeometry(QRect(300, 10, 361, 101));
         gridLayout = new QGridLayout(gridLayoutWidget_2);
         gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
         gridLayout->setContentsMargins(0, 0, 0, 0);
@@ -357,13 +412,280 @@ public:
 
         verticalLayout->addLayout(horizontalLayout_13);
 
+        verticalLayoutWidget = new QWidget(frame_2);
+        verticalLayoutWidget->setObjectName(QString::fromUtf8("verticalLayoutWidget"));
+        verticalLayoutWidget->setGeometry(QRect(20, 400, 321, 191));
+        verticalLayout_3 = new QVBoxLayout(verticalLayoutWidget);
+        verticalLayout_3->setObjectName(QString::fromUtf8("verticalLayout_3"));
+        verticalLayout_3->setContentsMargins(0, 0, 0, 0);
+        horizontalLayout_2 = new QHBoxLayout();
+        horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
+        horizontalLayout_16 = new QHBoxLayout();
+        horizontalLayout_16->setObjectName(QString::fromUtf8("horizontalLayout_16"));
+        horizontalLayout_26 = new QHBoxLayout();
+        horizontalLayout_26->setObjectName(QString::fromUtf8("horizontalLayout_26"));
+        label_10 = new QLabel(verticalLayoutWidget);
+        label_10->setObjectName(QString::fromUtf8("label_10"));
+
+        horizontalLayout_26->addWidget(label_10);
+
+
+        horizontalLayout_16->addLayout(horizontalLayout_26);
+
+
+        horizontalLayout_2->addLayout(horizontalLayout_16);
+
+        horizontalLayout_27 = new QHBoxLayout();
+        horizontalLayout_27->setObjectName(QString::fromUtf8("horizontalLayout_27"));
+        label_order1 = new QLabel(verticalLayoutWidget);
+        label_order1->setObjectName(QString::fromUtf8("label_order1"));
+
+        horizontalLayout_27->addWidget(label_order1);
+
+
+        horizontalLayout_2->addLayout(horizontalLayout_27);
+
+
+        verticalLayout_3->addLayout(horizontalLayout_2);
+
+        horizontalLayout_17 = new QHBoxLayout();
+        horizontalLayout_17->setObjectName(QString::fromUtf8("horizontalLayout_17"));
+        horizontalLayout_28 = new QHBoxLayout();
+        horizontalLayout_28->setObjectName(QString::fromUtf8("horizontalLayout_28"));
+        label_12 = new QLabel(verticalLayoutWidget);
+        label_12->setObjectName(QString::fromUtf8("label_12"));
+
+        horizontalLayout_28->addWidget(label_12);
+
+
+        horizontalLayout_17->addLayout(horizontalLayout_28);
+
+        horizontalLayout_29 = new QHBoxLayout();
+        horizontalLayout_29->setObjectName(QString::fromUtf8("horizontalLayout_29"));
+        lcd_time1 = new QLCDNumber(verticalLayoutWidget);
+        lcd_time1->setObjectName(QString::fromUtf8("lcd_time1"));
+
+        horizontalLayout_29->addWidget(lcd_time1);
+
+
+        horizontalLayout_17->addLayout(horizontalLayout_29);
+
+
+        verticalLayout_3->addLayout(horizontalLayout_17);
+
+        horizontalLayout_18 = new QHBoxLayout();
+        horizontalLayout_18->setObjectName(QString::fromUtf8("horizontalLayout_18"));
+        horizontalLayout_30 = new QHBoxLayout();
+        horizontalLayout_30->setObjectName(QString::fromUtf8("horizontalLayout_30"));
+        label_13 = new QLabel(verticalLayoutWidget);
+        label_13->setObjectName(QString::fromUtf8("label_13"));
+
+        horizontalLayout_30->addWidget(label_13);
+
+
+        horizontalLayout_18->addLayout(horizontalLayout_30);
+
+        horizontalLayout_32 = new QHBoxLayout();
+        horizontalLayout_32->setObjectName(QString::fromUtf8("horizontalLayout_32"));
+        lcd_red1 = new QLCDNumber(verticalLayoutWidget);
+        lcd_red1->setObjectName(QString::fromUtf8("lcd_red1"));
+
+        horizontalLayout_32->addWidget(lcd_red1);
+
+
+        horizontalLayout_18->addLayout(horizontalLayout_32);
+
+
+        verticalLayout_3->addLayout(horizontalLayout_18);
+
+        horizontalLayout_19 = new QHBoxLayout();
+        horizontalLayout_19->setObjectName(QString::fromUtf8("horizontalLayout_19"));
+        horizontalLayout_33 = new QHBoxLayout();
+        horizontalLayout_33->setObjectName(QString::fromUtf8("horizontalLayout_33"));
+        label_14 = new QLabel(verticalLayoutWidget);
+        label_14->setObjectName(QString::fromUtf8("label_14"));
+
+        horizontalLayout_33->addWidget(label_14);
+
+
+        horizontalLayout_19->addLayout(horizontalLayout_33);
+
+        horizontalLayout_34 = new QHBoxLayout();
+        horizontalLayout_34->setObjectName(QString::fromUtf8("horizontalLayout_34"));
+        lcd_blue1 = new QLCDNumber(verticalLayoutWidget);
+        lcd_blue1->setObjectName(QString::fromUtf8("lcd_blue1"));
+
+        horizontalLayout_34->addWidget(lcd_blue1);
+
+
+        horizontalLayout_19->addLayout(horizontalLayout_34);
+
+
+        verticalLayout_3->addLayout(horizontalLayout_19);
+
+        horizontalLayout_20 = new QHBoxLayout();
+        horizontalLayout_20->setObjectName(QString::fromUtf8("horizontalLayout_20"));
+        horizontalLayout_35 = new QHBoxLayout();
+        horizontalLayout_35->setObjectName(QString::fromUtf8("horizontalLayout_35"));
+        label_15 = new QLabel(verticalLayoutWidget);
+        label_15->setObjectName(QString::fromUtf8("label_15"));
+
+        horizontalLayout_35->addWidget(label_15);
+
+
+        horizontalLayout_20->addLayout(horizontalLayout_35);
+
+        horizontalLayout_36 = new QHBoxLayout();
+        horizontalLayout_36->setObjectName(QString::fromUtf8("horizontalLayout_36"));
+        lcd_yellow1 = new QLCDNumber(verticalLayoutWidget);
+        lcd_yellow1->setObjectName(QString::fromUtf8("lcd_yellow1"));
+
+        horizontalLayout_36->addWidget(lcd_yellow1);
+
+
+        horizontalLayout_20->addLayout(horizontalLayout_36);
+
+
+        verticalLayout_3->addLayout(horizontalLayout_20);
+
+        verticalLayoutWidget_3 = new QWidget(frame_2);
+        verticalLayoutWidget_3->setObjectName(QString::fromUtf8("verticalLayoutWidget_3"));
+        verticalLayoutWidget_3->setGeometry(QRect(349, 399, 311, 191));
+        verticalLayout_4 = new QVBoxLayout(verticalLayoutWidget_3);
+        verticalLayout_4->setObjectName(QString::fromUtf8("verticalLayout_4"));
+        verticalLayout_4->setContentsMargins(0, 0, 0, 0);
+        horizontalLayout_21 = new QHBoxLayout();
+        horizontalLayout_21->setObjectName(QString::fromUtf8("horizontalLayout_21"));
+        horizontalLayout_37 = new QHBoxLayout();
+        horizontalLayout_37->setObjectName(QString::fromUtf8("horizontalLayout_37"));
+        label_11 = new QLabel(verticalLayoutWidget_3);
+        label_11->setObjectName(QString::fromUtf8("label_11"));
+
+        horizontalLayout_37->addWidget(label_11);
+
+
+        horizontalLayout_21->addLayout(horizontalLayout_37);
+
+        horizontalLayout_38 = new QHBoxLayout();
+        horizontalLayout_38->setObjectName(QString::fromUtf8("horizontalLayout_38"));
+        label_order2 = new QLabel(verticalLayoutWidget_3);
+        label_order2->setObjectName(QString::fromUtf8("label_order2"));
+
+        horizontalLayout_38->addWidget(label_order2);
+
+
+        horizontalLayout_21->addLayout(horizontalLayout_38);
+
+
+        verticalLayout_4->addLayout(horizontalLayout_21);
+
+        horizontalLayout_22 = new QHBoxLayout();
+        horizontalLayout_22->setObjectName(QString::fromUtf8("horizontalLayout_22"));
+        horizontalLayout_39 = new QHBoxLayout();
+        horizontalLayout_39->setObjectName(QString::fromUtf8("horizontalLayout_39"));
+        label_16 = new QLabel(verticalLayoutWidget_3);
+        label_16->setObjectName(QString::fromUtf8("label_16"));
+
+        horizontalLayout_39->addWidget(label_16);
+
+
+        horizontalLayout_22->addLayout(horizontalLayout_39);
+
+        horizontalLayout_40 = new QHBoxLayout();
+        horizontalLayout_40->setObjectName(QString::fromUtf8("horizontalLayout_40"));
+        lcd_time2 = new QLCDNumber(verticalLayoutWidget_3);
+        lcd_time2->setObjectName(QString::fromUtf8("lcd_time2"));
+
+        horizontalLayout_40->addWidget(lcd_time2);
+
+
+        horizontalLayout_22->addLayout(horizontalLayout_40);
+
+
+        verticalLayout_4->addLayout(horizontalLayout_22);
+
+        horizontalLayout_23 = new QHBoxLayout();
+        horizontalLayout_23->setObjectName(QString::fromUtf8("horizontalLayout_23"));
+        horizontalLayout_41 = new QHBoxLayout();
+        horizontalLayout_41->setObjectName(QString::fromUtf8("horizontalLayout_41"));
+        label_17 = new QLabel(verticalLayoutWidget_3);
+        label_17->setObjectName(QString::fromUtf8("label_17"));
+
+        horizontalLayout_41->addWidget(label_17);
+
+
+        horizontalLayout_23->addLayout(horizontalLayout_41);
+
+        horizontalLayout_42 = new QHBoxLayout();
+        horizontalLayout_42->setObjectName(QString::fromUtf8("horizontalLayout_42"));
+        lcd_red2 = new QLCDNumber(verticalLayoutWidget_3);
+        lcd_red2->setObjectName(QString::fromUtf8("lcd_red2"));
+
+        horizontalLayout_42->addWidget(lcd_red2);
+
+
+        horizontalLayout_23->addLayout(horizontalLayout_42);
+
+
+        verticalLayout_4->addLayout(horizontalLayout_23);
+
+        horizontalLayout_24 = new QHBoxLayout();
+        horizontalLayout_24->setObjectName(QString::fromUtf8("horizontalLayout_24"));
+        horizontalLayout_43 = new QHBoxLayout();
+        horizontalLayout_43->setObjectName(QString::fromUtf8("horizontalLayout_43"));
+        label_18 = new QLabel(verticalLayoutWidget_3);
+        label_18->setObjectName(QString::fromUtf8("label_18"));
+
+        horizontalLayout_43->addWidget(label_18);
+
+
+        horizontalLayout_24->addLayout(horizontalLayout_43);
+
+        horizontalLayout_44 = new QHBoxLayout();
+        horizontalLayout_44->setObjectName(QString::fromUtf8("horizontalLayout_44"));
+        lcd_blue2 = new QLCDNumber(verticalLayoutWidget_3);
+        lcd_blue2->setObjectName(QString::fromUtf8("lcd_blue2"));
+
+        horizontalLayout_44->addWidget(lcd_blue2);
+
+
+        horizontalLayout_24->addLayout(horizontalLayout_44);
+
+
+        verticalLayout_4->addLayout(horizontalLayout_24);
+
+        horizontalLayout_25 = new QHBoxLayout();
+        horizontalLayout_25->setObjectName(QString::fromUtf8("horizontalLayout_25"));
+        horizontalLayout_45 = new QHBoxLayout();
+        horizontalLayout_45->setObjectName(QString::fromUtf8("horizontalLayout_45"));
+        label_19 = new QLabel(verticalLayoutWidget_3);
+        label_19->setObjectName(QString::fromUtf8("label_19"));
+
+        horizontalLayout_45->addWidget(label_19);
+
+
+        horizontalLayout_25->addLayout(horizontalLayout_45);
+
+        horizontalLayout_46 = new QHBoxLayout();
+        horizontalLayout_46->setObjectName(QString::fromUtf8("horizontalLayout_46"));
+        lcd_yellow2 = new QLCDNumber(verticalLayoutWidget_3);
+        lcd_yellow2->setObjectName(QString::fromUtf8("lcd_yellow2"));
+
+        horizontalLayout_46->addWidget(lcd_yellow2);
+
+
+        horizontalLayout_25->addLayout(horizontalLayout_46);
+
+
+        verticalLayout_4->addLayout(horizontalLayout_25);
+
 
         hboxLayout->addWidget(frame_2);
 
         MainWindowDesign->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindowDesign);
         menubar->setObjectName(QString::fromUtf8("menubar"));
-        menubar->setGeometry(QRect(0, 0, 886, 25));
+        menubar->setGeometry(QRect(0, 0, 691, 25));
         menu_File = new QMenu(menubar);
         menu_File->setObjectName(QString::fromUtf8("menu_File"));
         MainWindowDesign->setMenuBar(menubar);
@@ -406,6 +728,18 @@ public:
         pushButton_start->setText(QApplication::translate("MainWindowDesign", "START", 0, QApplication::UnicodeUTF8));
         pushButton_pause->setText(QApplication::translate("MainWindowDesign", "PAUSE/RESUME", 0, QApplication::UnicodeUTF8));
         pushButton_stop->setText(QApplication::translate("MainWindowDesign", "STOP", 0, QApplication::UnicodeUTF8));
+        label_10->setText(QApplication::translate("MainWindowDesign", "<html><head/><body><p align=\"center\"><span style=\" font-size:14pt; font-weight:600;\">ORDER 1:</span></p></body></html>", 0, QApplication::UnicodeUTF8));
+        label_order1->setText(QString());
+        label_12->setText(QApplication::translate("MainWindowDesign", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt; font-weight:600;\">Time left:</span></p></body></html>", 0, QApplication::UnicodeUTF8));
+        label_13->setText(QApplication::translate("MainWindowDesign", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt; font-weight:600;\">Red needed:</span></p></body></html>", 0, QApplication::UnicodeUTF8));
+        label_14->setText(QApplication::translate("MainWindowDesign", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt; font-weight:600;\">Blue needed: </span></p></body></html>", 0, QApplication::UnicodeUTF8));
+        label_15->setText(QApplication::translate("MainWindowDesign", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt; font-weight:600;\">Yellow needed:</span></p></body></html>", 0, QApplication::UnicodeUTF8));
+        label_11->setText(QApplication::translate("MainWindowDesign", "<html><head/><body><p align=\"center\"><span style=\" font-size:14pt; font-weight:600;\">ORDER 2:</span></p></body></html>", 0, QApplication::UnicodeUTF8));
+        label_order2->setText(QString());
+        label_16->setText(QApplication::translate("MainWindowDesign", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt; font-weight:600;\">Time left:</span></p></body></html>", 0, QApplication::UnicodeUTF8));
+        label_17->setText(QApplication::translate("MainWindowDesign", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt; font-weight:600;\">Red needed</span></p></body></html>", 0, QApplication::UnicodeUTF8));
+        label_18->setText(QApplication::translate("MainWindowDesign", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt; font-weight:600;\">Blue needed</span></p></body></html>", 0, QApplication::UnicodeUTF8));
+        label_19->setText(QApplication::translate("MainWindowDesign", "<html><head/><body><p align=\"center\"><span style=\" font-size:12pt; font-weight:600;\">Yellow needed</span></p></body></html>", 0, QApplication::UnicodeUTF8));
         menu_File->setTitle(QApplication::translate("MainWindowDesign", "&App", 0, QApplication::UnicodeUTF8));
     } // retranslateUi
 

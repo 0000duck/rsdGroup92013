@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>886</width>
-    <height>528</height>
+    <width>691</width>
+    <height>677</height>
    </rect>
   </property>
   <property name="mouseTracking">
@@ -89,9 +89,9 @@
        <property name="geometry">
         <rect>
          <x>300</x>
-         <y>150</y>
+         <y>119</y>
          <width>361</width>
-         <height>51</height>
+         <height>81</height>
         </rect>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_6">
@@ -178,7 +178,7 @@
          <x>300</x>
          <y>10</y>
          <width>361</width>
-         <height>127</height>
+         <height>101</height>
         </rect>
        </property>
        <layout class="QGridLayout" name="gridLayout">
@@ -343,6 +343,262 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="verticalLayoutWidget">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>400</y>
+         <width>321</width>
+         <height>191</height>
+        </rect>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_16">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_26">
+              <item>
+               <widget class="QLabel" name="label_10">
+                <property name="text">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;ORDER 1:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_27">
+            <item>
+             <widget class="QLabel" name="label_order1">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_17">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_28">
+            <item>
+             <widget class="QLabel" name="label_12">
+              <property name="text">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;Time left:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_29">
+            <item>
+             <widget class="QLCDNumber" name="lcd_time1"/>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_18">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_30">
+            <item>
+             <widget class="QLabel" name="label_13">
+              <property name="text">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;Red needed:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_32">
+            <item>
+             <widget class="QLCDNumber" name="lcd_red1"/>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_19">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_33">
+            <item>
+             <widget class="QLabel" name="label_14">
+              <property name="text">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;Blue needed: &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_34">
+            <item>
+             <widget class="QLCDNumber" name="lcd_blue1"/>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_20">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_35">
+            <item>
+             <widget class="QLabel" name="label_15">
+              <property name="text">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;Yellow needed:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_36">
+            <item>
+             <widget class="QLCDNumber" name="lcd_yellow1"/>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="verticalLayoutWidget_3">
+       <property name="geometry">
+        <rect>
+         <x>349</x>
+         <y>399</y>
+         <width>311</width>
+         <height>191</height>
+        </rect>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_21">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_37">
+            <item>
+             <widget class="QLabel" name="label_11">
+              <property name="text">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;ORDER 2:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_38">
+            <item>
+             <widget class="QLabel" name="label_order2">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_22">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_39">
+            <item>
+             <widget class="QLabel" name="label_16">
+              <property name="text">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;Time left:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_40">
+            <item>
+             <widget class="QLCDNumber" name="lcd_time2"/>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_23">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_41">
+            <item>
+             <widget class="QLabel" name="label_17">
+              <property name="text">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;Red needed&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_42">
+            <item>
+             <widget class="QLCDNumber" name="lcd_red2"/>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_24">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_43">
+            <item>
+             <widget class="QLabel" name="label_18">
+              <property name="text">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;Blue needed&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_44">
+            <item>
+             <widget class="QLCDNumber" name="lcd_blue2"/>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_25">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_45">
+            <item>
+             <widget class="QLabel" name="label_19">
+              <property name="text">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;Yellow needed&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_46">
+            <item>
+             <widget class="QLCDNumber" name="lcd_yellow2"/>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -352,7 +608,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>886</width>
+     <width>691</width>
      <height>25</height>
     </rect>
    </property>
