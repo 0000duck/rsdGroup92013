@@ -2,6 +2,7 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 #include "std_msgs/Bool.h"
+#include "MESSAGES/order.h"
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -49,6 +50,7 @@ int main(int argc, char *argv[])
  	ros::Subscriber sub = h.subscribe("/newConfig", 10, configCallback);
  	ros::Subscriber convStopSub = h.subscribe("/conveyerStopped", 10, convStopCallback);
  	ros::Subscriber pauSub = h.subscribe("/systemPause", 10, pauseCallback);
+ 	ros::Publisher failPub = h.advertise<MESSAGES::order>("/failedPickup", 20);
 
 	int sockfd, newsockfd, portno;
     socklen_t clilen;
@@ -98,7 +100,9 @@ int main(int argc, char *argv[])
     //list1.push_back("( 0.011 , 0.053 , 0 , 0 , 0 , 1.54, 1,)");
     //list1.push_back("( -0.028 , -0.03 , 0 , 0 , 0 , 0.2 , 1,)");
     //list1.push_back("( -0.035 , 0.058 , 0 , 0 , 0 , -0.4 , 1,)");
-    int ready = 2;
+    int ready = 1;
+    int failColor=-1;
+    int failOrder=-1;
 	std_msgs::String message;
 //	message.data="0";
 	///readyPub.publish(message);
@@ -116,23 +120,62 @@ int main(int argc, char *argv[])
 					temp.append("\n");
 					const char* msg = temp.c_str();
 					n = write(newsockfd,msg,strlen(msg));
-
+					cout<< "wrote: " << msg << endl;
+					cout << "picked up: " << atoi(temp.substr(temp.size()-6,1).c_str()) << " , " << atoi(temp.substr(temp.size()-3,1).c_str()) << endl;
+				    failColor=atoi(temp.substr(temp.size()-6,1).c_str());
+				    failOrder=atoi(temp.substr(temp.size()-3,1).c_str());
 					if (n < 0) error("ERROR writing to socket");
 
 					ready=0;
 				}
 			}
 			else{
-				conveyerStopped=0;
-				if(ready==2){
+				if(ready==1){
+					cout << "conveyor move" << endl;
+					conveyerStopped=0;
 					message.data="1"; // conveyer may move
 					readyPub.publish(message);
 				}
 			}
 		}
+
+
 		n=read(newsockfd,buffer,5);
 
 		ready=atoi(buffer);
+
+		cout << buffer << " , " << ready << endl;
+
+		//bzero(buffer,256);
+
+		if(ready==3){
+			cout << "FAIL" << endl;
+			string temp = ("(1)");
+			temp.append("\n");
+			const char* msg = temp.c_str();
+			n = write(newsockfd,msg,strlen(msg));
+
+			MESSAGES::order fail;
+			if(failColor==0){
+				fail.red=1;
+				fail.blue=0;
+				fail.yellow=0;
+			}
+			else if(failColor==1){
+				fail.red=0;
+				fail.blue=1;
+				fail.yellow=0;
+			}
+			else if(failColor==2){
+				fail.red=0;
+				fail.blue=0;
+				fail.yellow=1;
+			}
+			fail.slider=failOrder;
+			failPub.publish(fail);
+		}
+	    failColor=-1;
+	    failOrder=-1;
 
 		ros::spinOnce();
 		loop_rate.sleep();

@@ -1,0 +1,15 @@
+<launch>
+
+	<group ns="PLC_INTERFACE">
+		<node pkg="PLC_INTERFACE" name="plc" type="python.py"> </node>
+	</group>
+
+	<group ns="VISION">
+		<node pkg="VISION" name="vision" type="vision"> </node>
+	</group>
+
+	<group ns="ORDER_SYSTEM">
+		<node pkg="ORDER_SYSTEM" name="orderSystem" type="orderSystem.py"> </node>
+	</group>
+
+</launch>

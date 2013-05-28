@@ -66,6 +66,8 @@ CMakeFiles/robotCommandSender.dir/src/robotCommandSender.cpp.o: /opt/ros/groovy/
 CMakeFiles/robotCommandSender.dir/src/robotCommandSender.cpp.o: /opt/ros/groovy/share/rosconsole/package.xml
 CMakeFiles/robotCommandSender.dir/src/robotCommandSender.cpp.o: /opt/ros/groovy/share/xmlrpcpp/package.xml
 CMakeFiles/robotCommandSender.dir/src/robotCommandSender.cpp.o: /opt/ros/groovy/share/roscpp/package.xml
+CMakeFiles/robotCommandSender.dir/src/robotCommandSender.cpp.o: /home/rsd/workspace/RSD09/MESSAGES/manifest.xml
+CMakeFiles/robotCommandSender.dir/src/robotCommandSender.cpp.o: /home/rsd/workspace/RSD09/MESSAGES/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/rsd/workspace/RSD09/ROBOT_CONTROL/build/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/robotCommandSender.dir/src/robotCommandSender.cpp.o"
 	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -o CMakeFiles/robotCommandSender.dir/src/robotCommandSender.cpp.o -c /home/rsd/workspace/RSD09/ROBOT_CONTROL/src/robotCommandSender.cpp
