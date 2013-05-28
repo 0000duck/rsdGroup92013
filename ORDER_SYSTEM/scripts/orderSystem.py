@@ -5,6 +5,7 @@ import rospy
 from MESSAGES.msg import order
 from std_msgs.msg import Bool
 from std_msgs.msg import Int32
+from std_msgs.msg import String
 
 import sys                              #for exit
 import xml.etree.ElementTree as xml     # XML parsing
@@ -25,14 +26,18 @@ port = 80
 detectedBricks = [2,2,2]        # Red, Blue, Yellow (bricks)
 ROSDetectedBricks = []
 orderTimeOut = []
+failedRed = 0
+failedBlue = 0
+failedYellow = 0
+failedSlider = -1
 DetectionsCounter = -1
 tempCounter = -1
 orders = []
 totalOrdersDone = 0
 base_url = 'http://192.168.10.100/'
-orders_dict = {'orderName':'None','timeStamp':0,'orderState':"IDLE",'orderDone':True,'slider':-1, 'bricks':0,'ticket':0,'redTotal':0,'blueTotal':0,'yellowTotal':0,'redPicked':0,'bluePicked':0,'yellowPicked':0,'redNeeded':0,'blueNeeded':0,'yellowNeeded':0}
+orders_dict = {'orderName':'None','timeStamp':0,'orderState':"IDLE",'orderDone':True,'slider':0, 'bricks':0,'ticket':0,'redTotal':0,'blueTotal':0,'yellowTotal':0,'redPicked':0,'bluePicked':0,'yellowPicked':0,'redNeeded':0,'blueNeeded':0,'yellowNeeded':0}
 slider_dict = {0:{'busy':False,'orderName':'None'}, 1:{'busy':False,'orderName':'None'}}
-orderProcess = True
+orderProcess = False
 ################################################################################################### 
 #------------------------------------- Helper functions ------------------------------------------- 
 ################################################################################################### 
@@ -114,10 +119,10 @@ def getOrders(numberOfOrders,detectedBricks,orderProcess):
         orderList = requests.get(base_url + serverPath(numberOfOrders))
     except Exception, e:
         print "Exception: " + str(e)
-        rospy.warning("You're probably on eduroam, you fool!")
+        print "You're probably on eduroam, you fool!"
         sys.exit()
     if(orderList.status_code != 200):
-        rospy.warning('HTTP error')
+        print 'HTTP error'
         
     orderNames = parseorderList(orderList.content)
     bricks = [0,0,0]
@@ -155,7 +160,7 @@ def getOrders(numberOfOrders,detectedBricks,orderProcess):
             newOrder['timeStamp'] = rospy.get_time();
             newOrder['ticket'] = parseOrderReceipt(orderReceipt.content)
             print '\n ################################ \t An optimal order was found: ' + orderNames[x] + ' with ticket: ' + newOrder['ticket'] + '\t ##################'
-            newOrder['orderState'] = "ORDER_DONE"
+            #newOrder['orderState'] = "ORDER_DONE"
             return newOrder
         else:
            
@@ -212,9 +217,14 @@ def getOrders(numberOfOrders,detectedBricks,orderProcess):
                 newOrder['yellowNeeded'] = newOrder['yellowTotal']-newOrder['yellowPicked']    
     
     orderReceipt = requests.put(base_url + serverPath(newOrder['orderName']))
+    print "afjiafjklasjklf: " + str(orderReceipt.status_code)
     newOrder['timeStamp'] = rospy.get_time();
-    newOrder['ticket'] = parseOrderReceipt(orderReceipt.content)
-    newOrder['orderState'] = "ORDER_NOT_DONE"
+    if(orderReceipt.status_code == 200):
+        newOrder['ticket'] = parseOrderReceipt(orderReceipt.content)
+        newOrder['orderState'] = "ORDER_NOT_DONE"
+    else:
+        print "HTTP error: Corrupted order receipt! Discarding order and requesting a new"
+        newOrder['orderState'] = 'IDLE'
     
     print '\n ################################ \t An order was found: ' + str(newOrder['orderName']) + ' with ticket: ' + str(newOrder['ticket']) + '\t ##########################'
     return newOrder
@@ -236,7 +246,6 @@ def getSpecificOrder(prevOrderDetails,detectedBricks):
     newOrder['timeStamp'] = prevOrderDetails['timeStamp']
     
     
-    #print "Prev1 red: " + str(prevOrderDetails['redNeeded']) + " prev1 blue: " + str(prevOrderDetails['blueNeeded']) + " prev1 yellow: " + str(prevOrderDetails['yellowNeeded'])
     print '\n ################################ \t Continued processing order: ' + prevOrderDetails['orderName'] + '\t ##########################'
     bricks = [0,0,0]
     bricks[colors.RED] = prevOrderDetails['redNeeded']      # We subtract the bricks that have already picked up in the previous batch
@@ -287,14 +296,12 @@ def getSpecificOrder(prevOrderDetails,detectedBricks):
         if(newOrder['yellowNeeded'] > detectedBricks[colors.YELLOW]):
             newOrder['yellowPicked'] = detectedBricks[colors.YELLOW]
             
-        #print "Prev2 red: " + str(newOrder['redNeeded']) + " prev2 blue: " + str(newOrder['blueNeeded']) + " prev2 yellow: " + str(newOrder['yellowNeeded'])
         newOrder['redNeeded'] -= newOrder['redPicked']            
   
         newOrder['blueNeeded'] -= newOrder['bluePicked']
            
         newOrder['yellowNeeded'] -= newOrder['yellowPicked']
     
-        #print "Prev3 red: " + str(newOrder['redNeeded']) + " prev3 blue: " + str(newOrder['blueNeeded']) + " prev3 yellow: " + str(newOrder['yellowNeeded'])
         if(newOrder['redNeeded'] <= 0 and newOrder['blueNeeded'] <= 0 and newOrder['yellowNeeded'] <= 0):
             newOrder['orderState'] = "ORDER_DONE"
         else:
@@ -358,7 +365,7 @@ def logMsg(event, comment):
 
 
 ################################################################################################### 
-#--------------------------------------- ROS functions -------------------------------------------- 
+#--------------------------------------- Publish functions -------------------------------------------- 
 ################################################################################################### 
 
 
@@ -376,13 +383,13 @@ def publish(orders):
  
 def publishNeededBricks(orders):
     # Telling the GUI what the order still needs
+    global orderProcess
     pub_msg = order()
     pub_msg.header.stamp = rospy.get_rostime()
-    print 'red N: ' + str(orders['redNeeded'])
     pub_msg.red = orders['redNeeded']
     pub_msg.blue = orders['blueNeeded']
     pub_msg.yellow = orders['yellowNeeded']
-    pub_msg.slider = orders['slider']
+    pub_msg.slider = orderProcess
     global pubGUI
     pubGUI.publish(pub_msg)
 
@@ -403,9 +410,8 @@ def publishTotalOrders(totalOrdersDone):
     pubTotalOrders.publish(pubTotalMsg)
     
 
-
 ################################################################################################### 
-#--------------------------------------- Main program --------------------------------------------- 
+#--------------------------------------- Callback functions --------------------------------------------- 
 ################################################################################################### 
 
 def visCallback(data):
@@ -417,7 +423,50 @@ def visCallback(data):
         #listReceived = True
         tempBricks = [data.red,data.blue,data.yellow]
         ROSDetectedBricks.append(tempBricks)
+        
+def pauseCallback(data):
+    if(data.data == True):
+        logMsg('PML_Held', 'System has been paused')
+    else:
+        logMsg('PML_Execute','System has been resumed')
+        
+        
+def feedbackCallback(data):
+    global failedRed
+    global failedBlue
+    global failedYellow
     
+    if(data.red == 1):
+        failedRed = failedRed + 1
+    elif(data.blue == 1):
+        failedBlue = failedBlue + 1
+    elif(data.yellow == 1):
+        failedYellow = failedYellow + 1
+    failedSlider = data.slider
+        
+def robotCallback(data):
+    global failedRed
+    global failedBlue
+    global failedYellow
+    global failedSlider
+    global orders
+    
+    
+    if(orders[failedSlider]['orderState'] != 'IDLE'):
+        orders[failedSlider]['redNeeded'] += failedRed
+        orders[failedSlider]['blueNeeded'] += failedBlue
+        orders[failedSlider]['yellowNeeded'] += failedYellow
+        failedRed=0
+        failedBlue=0
+        failedYellow=0
+        failedSlider=-1
+        print "red: " + str(orders[failedSlider]['redNeeded']) + " blue: " + str(orders[failedSlider]['blueNeeded']) + " yellow: " + str(orders[failedSlider]['yellowNeeded']) 
+        if(orders[failedSlider]['redNeeded'] == 0 and orders[failedSlider]['blueNeeded'] == 0 and orders[failedSlider]['yellowNeeded'] == 0):
+            orders[failedSlider]['orderState'] = 'ORDER_DONE'
+        else:
+            orders[failedSlider]['orderState'] = 'ORDER_NOT_DONE'
+        
+        
 
 ################################################################################################### 
 #--------------------------------------- Main function -------------------------------------------- 
@@ -437,6 +486,9 @@ def main():
     global ROSDetectedBricks
     global tempCounter
     global totalOrdersDone
+    global failedRed
+    global failedBlue
+    global failedYellow
     sliderStatus = dict(slider_dict)
     bestOrder = dict(orders_dict)
     orders.append(bestOrder)        # Initialize the two orders
@@ -453,12 +505,12 @@ def main():
                     orders = removeOldOrders(orders)
                     sliderStatus[orderProcess]['orderName'] = 'None'
                     sliderStatus[orderProcess]['busy'] = False
-                orderProcess = not orderProcess
+                #orderProcess = not orderProcess
                 rospy.sleep(2.0)
         except KeyboardInterrupt:
             sys.exit()
-        if((orders[orderProcess]['redNeeded'] + orders[orderProcess]['blueNeeded'] + orders[orderProcess]['yellowNeeded']) > (orders[not orderProcess]['redNeeded'] + orders[not orderProcess]['blueNeeded'] + orders[not orderProcess]['yellowNeeded']) ):
-            orderProcess = not orderProcess
+        #if((orders[orderProcess]['redNeeded'] + orders[orderProcess]['blueNeeded'] + orders[orderProcess]['yellowNeeded']) > (orders[not orderProcess]['redNeeded'] + orders[not orderProcess]['blueNeeded'] + orders[not orderProcess]['yellowNeeded']) ):
+           # orderProcess = not orderProcess
         tempCounter = DetectionsCounter     # Finding out if there is a detection available
 
 ################################################################################################### 
@@ -476,50 +528,39 @@ def main():
 ###################################################################################################                
         if(orders[orderProcess]['orderState'] =="GET_ORDER" and tempCounter >= 0):
             
-            #print "orderProc(getORDER): " + str(orderProcess)
-            #print "orderP0: " + str(orders[orderProcess]) + "\n\n"
-            #print "orderP0: " + str(orders[not orderProcess]) + "\n\n"
             orders[orderProcess] = getOrders(requestedOrders, ROSDetectedBricks[tempCounter],orderProcess)   
-            #print "orderP3: " + str(orders[orderProcess]) + "\n\n"
-            #print "orderP3: " + str(orders[not orderProcess]) + "\n\n"
-        
+
+            if(orders[orderProcess]['orderState'] != 'IDLE'):        # If IDLE, an error has occured an no new order is started
+                logMsg('PML_Execute', 'System has been started')
+                logMsg('Order_Start', orders[orderProcess]['orderName'])
+                publishOrderBegun()
+                printOrderSpecs(orders[orderProcess])
             
-            logMsg('ORDER_START', orders[orderProcess]['orderName'])
-            publishOrderBegun()
+                #sliderStatus = assignSlider(orders[orderProcess],sliderStatus)
+                #if(sliderStatus[0]['orderName'] == orders[orderProcess]['orderName']):
+                #    orders[orderProcess]['slider'] = 0
+                #elif(sliderStatus[1]['orderName'] == orders[orderProcess]['orderName']):
+                #     orders[orderProcess]['slider'] = 1
             
-            printOrderSpecs(orders[orderProcess])
+                print '\n ################################ \t Publishing new order: ' + str(orders[orderProcess]['orderName']) + ' from order thread ' + str(int(orderProcess)) + '\t \t ##########################'
+                publish(orders[orderProcess])
             
-            #print '\n ################################ \t Before Slider 0 \t \t ##########################'
-            #printSliderStatus(sliderStatus[0])
-            #print '\n ################################ \t Before Slider 1 \t \t ##########################'
-            #printSliderStatus(sliderStatus[1])   
+                print '\n ################################ \t Slider 0 \t \t ##########################'
+                printSliderStatus(sliderStatus[0])
+                print '\n ################################ \t Slider 1 \t \t ##########################'
+                printSliderStatus(sliderStatus[1])
             
+                publishNeededBricks(orders[orderProcess])
             
-            sliderStatus = assignSlider(orders[orderProcess],sliderStatus)
-            if(sliderStatus[0]['orderName'] == orders[orderProcess]['orderName']):
-                orders[orderProcess]['slider'] = 0
-            elif(sliderStatus[1]['orderName'] == orders[orderProcess]['orderName']):
-                orders[orderProcess]['slider'] = 1
-            
-            print '\n ################################ \t Publishing new order: ' + str(orders[orderProcess]['orderName']) + ' from order thread ' + str(int(orderProcess)) + '\t \t ##########################'
-            publish(orders[orderProcess])
-            
-            print '\n ################################ \t Slider 0 \t \t ##########################'
-            printSliderStatus(sliderStatus[0])
-            print '\n ################################ \t Slider 1 \t \t ##########################'
-            printSliderStatus(sliderStatus[1])
-            
-            publishNeededBricks(orders[orderProcess])
-            
-            ROSDetectedBricks.pop(tempCounter)   
-            tempCounter = tempCounter - 1                                   # Remove detection list from input array and wait for new detection
-            DetectionsCounter = DetectionsCounter - 1
+                ROSDetectedBricks.pop(tempCounter)   
+                tempCounter = tempCounter - 1                                   # Remove detection list from input array and wait for new detection
+                DetectionsCounter = DetectionsCounter - 1
             
             
 ################################################################################################### 
 #--------------------------------------- Order not done state ------------------------------------- 
 ###################################################################################################        
-        if(orders[orderProcess]['orderState'] == "ORDER_NOT_DONE" and tempCounter >= 0):
+        elif(orders[orderProcess]['orderState'] == "ORDER_NOT_DONE" and tempCounter >= 0):
             
             elapsed = rospy.get_time() - orders[orderProcess]['timeStamp']
             if(int(elapsed) > 180):   # CHANGE THIS!!!!!!!!!!
@@ -562,17 +603,21 @@ def main():
 ################################################################################################### 
 #--------------------------------------- Order done state ----------------------------------------- 
 ###################################################################################################              
-        if(orders[orderProcess]['orderState'] =="ORDER_DONE"):
-            deleteOrder(orders[slider]['orderName'],orders[slider]['ticket'] )
-            sliderStatus = resetSlider(sliderStatus)
-            orders[orderProcess]['slider'] = -1                           # To indicate that no slider is assigned
-            logMsg('ORDER_DONE', orders[orderProcess]['orderName'])
+        elif(orders[orderProcess]['orderState'] =="ORDER_DONE"):
+            deleteOrder(orders[orderProcess]['orderName'],orders[orderProcess]['ticket'] )
             totalOrdersDone = totalOrdersDone + 1
             publishTotalOrders(totalOrdersDone)
             publishNeededBricks(orders[orderProcess])
-            # Signal Vision system that the order is done. Wait for new detectedBricks
+            sliderStatus = resetSlider(sliderStatus)
+            if(orders[orderProcess]['slider'] == 0):
+                orders[orderProcess]['slider'] = 1
+            else:
+                orders[orderProcess]['slider']= 0
+            logMsg('Order_Done', orders[orderProcess]['orderName'])
             orders[orderProcess]['orderState'] = "IDLE"
-
+    
+    logMsg('PML_Stopped', 'System has been stopped')
+    
 ################################################################################################### 
 #--------------------------------------- ROS topic I/O -------------------------------------------- 
 ###################################################################################################
@@ -583,4 +628,7 @@ if __name__ == '__main__':
    pubTotalOrders = rospy.Publisher('/totalOrders', Int32)
    pubOrderBegun = rospy.Publisher('/orderBegun', Bool)
    rospy.Subscriber("/visDetected", order, visCallback)
+   rospy.Subscriber("/systemPause",Bool,pauseCallback)
+   rospy.Subscriber("/failedPickup", order, feedbackCallback)
+   rospy.Subscriber("/robotReady",String, robotCallback)
    main()

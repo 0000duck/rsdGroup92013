@@ -95,9 +95,9 @@ void colorFilter(const Mat& src, Mat& bw)
   	//Noise removal
   	Mat element = getStructuringElement(MORPH_RECT, Size(10, 10));
   	Mat element1 = getStructuringElement(MORPH_RECT, Size(25, 25));
-  	imwrite("colors.png", colors);
+  	//imwrite("colors.png", colors);
   	dilate(colors,colors,element1);
-  	imwrite("dialate.png", colors);
+  	//imwrite("dialate.png", colors);
   	erode(colors,bw,element);
 }
 
@@ -120,7 +120,7 @@ void getBricks(Mat& imgEdge, Mat& imgROI, ros::Publisher seenPub){
 
 			//if (contourArea(Mat(contours[i]))<yellowMax && contourArea(Mat(contours[i]))>blueMin)
 			//{
-				cout << "fafla: " << contourArea(Mat(contours[i])) << endl;
+				//cout << "fafla: " << contourArea(Mat(contours[i])) << endl;
 				contours1.push_back(contours[i]);
 			//}
 		}
@@ -135,7 +135,7 @@ void getBricks(Mat& imgEdge, Mat& imgROI, ros::Publisher seenPub){
 		int count = 0;
 		for(int i=0; i<contours1.size(); i++)
 		{
-			cout << "Area of brick: " << contourArea(Mat(contours1[i])) << endl;
+			//cout << "Area of brick: " << contourArea(Mat(contours1[i])) << endl;
 			int aera = int(contourArea(Mat(contours1[i])));
 			rectangle = minAreaRect(Mat(contours1[i]));
 			//ellipse = fitEllipse(Mat(contours1[i])); //Used since the rectangle.angle is only in the range 0...-90 degrees
@@ -164,10 +164,19 @@ void getBricks(Mat& imgEdge, Mat& imgROI, ros::Publisher seenPub){
 					{
 					angle=angle+PI;
 					}
-				cout << "Color: " <<color << " Center (m): " <<xPos <<","<< yPos << " Angle (rad): " << angle << endl;
+			//	cout << "Color: " <<color << " Center (m): " <<xPos <<","<< yPos << " Angle (rad): " << angle << endl;
 				if(angle<PI/2 && angle>-PI/2){
 					if(angle>PI/4)
 						angle-=PI/2;
+					temp.s=constructCommand(xPos, yPos, angle, BLUE,slider);
+					temp.color=BLUE;
+					list1.push_back(temp);
+					blue++;
+					count++;
+				}
+				else{
+					cout << "ANGLE SET TO 0" << endl;
+					angle=0;
 					temp.s=constructCommand(xPos, yPos, angle, BLUE,slider);
 					temp.color=BLUE;
 					list1.push_back(temp);
@@ -185,7 +194,7 @@ void getBricks(Mat& imgEdge, Mat& imgROI, ros::Publisher seenPub){
 					angle=angle+PI;
 					}
 				if(angle<PI/2 && angle>-PI/2){
-					cout << "Color: " <<color << " Center (m): " <<xPos <<","<< yPos << " Angle (rad): " << angle << endl;
+					//cout << "Color: " <<color << " Center (m): " <<xPos <<","<< yPos << " Angle (rad): " << angle << endl;
 					temp.s=constructCommand(xPos, yPos, angle, RED,slider);
 					temp.color=RED;
 					list1.push_back(temp);
@@ -203,7 +212,7 @@ void getBricks(Mat& imgEdge, Mat& imgROI, ros::Publisher seenPub){
 					angle=angle+PI;
 					}
 				if(angle<PI/2 && angle>-PI/2){
-					cout << "Color: " <<color << " Center (m): " <<xPos <<","<< yPos << " Angle (rad): " << angle << endl;
+					//cout << "Color: " <<color << " Center (m): " <<xPos <<","<< yPos << " Angle (rad): " << angle << endl;
 					temp.s=constructCommand(xPos, yPos, angle, YELLOW,slider);
 					temp.color=YELLOW;
 					list1.push_back(temp);
@@ -213,10 +222,10 @@ void getBricks(Mat& imgEdge, Mat& imgROI, ros::Publisher seenPub){
 			}
 			else //Not a brick
 			{
-				cout << "False detection" << endl;
+				//cout << "False detection" << endl;
 			}
 		}
-		cout << "Number of detected LEGO bricks: " << count << endl;
+		//cout << "Number of detected LEGO bricks: " << count << endl;
 
 		if(count>0){
 			MESSAGES::order seen;
@@ -249,16 +258,16 @@ void reqPickOfBricks(ros::Publisher configPub, ros::Publisher readyPub){
 				s << currentOrder;
 				message.data.append(s.str());
 				message.data.append(")");
-				cout << message.data <<endl;
+				//cout << message.data <<endl;
 
 				configPub.publish(message);
 				list1.pop_back();
-				cout << "send r" << endl;
+				//cout << "send r" << endl;
 
 			}
 			else{
 				list1.pop_back();
-				cout << "removed order" << endl;
+				//cout << "removed order" << endl;
 			}
 		}
 
@@ -273,11 +282,11 @@ void reqPickOfBricks(ros::Publisher configPub, ros::Publisher readyPub){
 				s << currentOrder;
 				message.data.append(s.str());
 				message.data.append(")");
-				cout << message.data <<endl;
+				//cout << message.data <<endl;
 
 				configPub.publish(message);
 				list1.pop_back();
-				cout << "send b" << endl;
+				//cout << "send b" << endl;
 
 			}
 			else{
@@ -297,15 +306,15 @@ void reqPickOfBricks(ros::Publisher configPub, ros::Publisher readyPub){
 				s << currentOrder;
 				message.data.append(s.str());
 				message.data.append(")");
-				cout << message.data <<endl;
+				//cout << message.data <<endl;
 
 				configPub.publish(message);
 				list1.pop_back();
-				cout << "send y" << endl;
+				//cout << "send y" << endl;
 			}
 			else{
 				list1.pop_back();
-				cout << "removed order" << endl;
+				//cout << "removed order" << endl;
 			}
 		}
 	}
@@ -429,7 +438,7 @@ int main(int argc, char *argv[])
 
 			src = frame.clone(); //make a clone of the captured image
 			//src=imread("Webcam.png",1);
-			imwrite("raw.png",src);
+			//imwrite("raw.png",src);
 			//src = imread("lego.png",1); //Use saved test image
 			/*if(!vm.empty()){
 				src=vm.back();
@@ -439,7 +448,7 @@ int main(int argc, char *argv[])
 			cvtColor(src,hsv,CV_BGR2HSV); //Convert to HSV
 
 			colorFilter(hsv,bw);
-			imwrite("bw.png", bw);
+			//imwrite("bw.png", bw);
 			getBricks(bw,src, seenPub);
 		}
 

@@ -33,6 +33,8 @@ QTime time, currentTime, updateTime, order1CountDown, order2CountDown;
 QDateTime date;
 bool pause = false;
 bool running = false;
+bool order1Done = true;
+bool order2Done = true;
 double timeStamp;
 double pauseTime;
 int secsIterator = 0;
@@ -72,7 +74,7 @@ MainWindow::~MainWindow() {}
 *****************************************************************************/
 void MainWindow::on_pushButton_start_clicked(bool check) {
 	ROS_INFO("System started!");
-	updateSystemState("RUNNING");
+	updateSystemState("Execute");
 	running = true;
     qnode.pauseTemp=false;
 	system("roslaunch MASTER_CONTROL legopicker.launch &");
@@ -81,7 +83,6 @@ void MainWindow::on_pushButton_start_clicked(bool check) {
 	hh = 0;
 	updateTime.setHMS(hh,mm,ss,0);
 	ui.lcd_up->display(updateTime.toString());
-	qnode.startPub();
 	time = QTime::currentTime();
 	timer->start(1000);
 
@@ -92,14 +93,14 @@ void MainWindow::on_pushButton_pause_clicked(bool check) {
 	if(pause == true) {
 		ROS_INFO("System resumed!");
 		pause = false;
-		updateSystemState("RUNNING");
+		updateSystemState("Execute");
 		timer->start();
 		qnode.PauseSystem();
 	}
 	else {
 		ROS_INFO("System paused!");
 		pause = true;
-		updateSystemState("SUSPENDED");
+		updateSystemState("Held");
 		timer->stop();
 		qnode.PauseSystem();
 	}
@@ -111,7 +112,7 @@ void MainWindow::on_pushButton_stop_clicked(bool check) {
 	mm = 0;
 	hh = 0;
 	timer->stop();
-	updateSystemState("STOPPED");
+	updateSystemState("Stopped");
 	system("killall roslaunch");
 	qnode.stopPub();
 }
@@ -135,6 +136,10 @@ void MainWindow::updateOrderNeeds() {
 		ui.lcd_red1->display(order1Info[0]);
 		ui.lcd_blue1->display(order1Info[1]);
 		ui.lcd_yellow1->display(order1Info[2]);
+		if((order1Info[0] == 0) && (order1Info[1] == 0) && (order1Info[2] == 0))
+		{
+			order1Done = true;
+		}
 	}
 
 	if(order2Timer->isActive())
@@ -143,6 +148,10 @@ void MainWindow::updateOrderNeeds() {
 		ui.lcd_red2->display(order2Info[0]);
 		ui.lcd_blue2->display(order2Info[1]);
 		ui.lcd_yellow2->display(order2Info[2]);
+		if((order2Info[0] == 0) && (order2Info[1] == 0) && (order2Info[2] == 0))
+		{
+			order2Done = true;
+		}
 	}
 }
 
@@ -175,6 +184,10 @@ void MainWindow::updateUpTime() {
 			hh++;
 		}
 	}
+	if(ss == 10 && mm == 0)
+	{
+		qnode.startPub();
+	}
 	updateTime.setHMS(hh,mm,ss,0);
 	ui.lcd_up->display(updateTime.toString());
 }
@@ -185,6 +198,7 @@ void MainWindow::OrderCountdown() {
 	{
 		if(qnode.timerStart == 0)
 		{
+			order1Done = false;
 			order1Timer->start(1);
 			ord1ss = 0;
 			ord1mm = 3;
@@ -195,6 +209,7 @@ void MainWindow::OrderCountdown() {
 	{
 		if(qnode.timerStart == 1)
 		{
+			order2Done = false;
 			order2Timer->start(1);
 			ord2ss = 0;
 			ord2mm = 3;
@@ -204,19 +219,19 @@ void MainWindow::OrderCountdown() {
 
 void MainWindow::updateSystemState(std::string state) {
 	ui.label_state->setText(QString::fromAscii(state.data(),state.size()));
-	if(state == "STOPPED")
+	if(state == "Stopped")
 	{
 		ui.graphics_red->setStyleSheet("background-color: rgb(255,0,0);");
 		ui.graphics_yellow->setStyleSheet("background-color: white;");
 		ui.graphics_green->setStyleSheet("background-color: white;");
 	}
-	if(state == "SUSPENDED")
+	if(state == "Held")
 	{
 		ui.graphics_yellow->setStyleSheet("background-color: rgb(255,255,0);");
 		ui.graphics_red->setStyleSheet("background-color: white;");
 		ui.graphics_green->setStyleSheet("background-color: white;");
 	}
-	if(state == "RUNNING")
+	if(state == "Execute")
 	{
 		ui.graphics_green->setStyleSheet("background-color: rgb(0,255,0);");
 		ui.graphics_yellow->setStyleSheet("background-color: white;");
@@ -229,11 +244,12 @@ void MainWindow::updateorderCountdowns() {
 
 	if(order1Timer->isActive())
 	{
-		if(ord1ss == 0 && ord1mm == 0)
+		if((ord1ss == 0 && ord1mm == 0) || (order1Done == true))
 		{
+			ROS_INFO("Resetting timer order1");
 			qnode.timerStart = -1;
+			ui.lcd_time2->display(QTime(0,0,0,0).toString(QString("hh:mm:ss")));
 			order1Timer->stop();
-			ui.lcd_time1->display((order1CountDown).toString(QString("00:00:00")));
 		}
 
 		if(ord1ss == 0 && ord1mm > 0)
@@ -242,19 +258,23 @@ void MainWindow::updateorderCountdowns() {
 			ord1mm--;
 		}
 
-
 		order1CountDown.setHMS(00,ord1mm,ord1ss,0);
 		ui.lcd_time1->display((order1CountDown).toString(QString("mm:ss")));
 		ord1ss--;
 	}
+	else
+	{
+		ui.lcd_time1->display(QTime(0,0,0,0).toString(QString("hh:mm:ss")));
+	}
 
 	if(order2Timer->isActive())
 	{
-		if(ord2ss == 0 && ord2mm == 0)
+		if((ord2ss == 0 && ord2mm == 0) || (order2Done == true))
 		{
+			ROS_INFO("Resetting timer order2");
 			qnode.timerStart = -1;
+			ui.lcd_time2->display(QTime(0,0,0,0).toString(QString("hh:mm:ss")));
 			order2Timer->stop();
-			ui.lcd_time2->display((order2CountDown).toString(QString("00:00:00")));
 		}
 
 		if(ord2ss == 0 && ord2mm > 0)
@@ -266,6 +286,10 @@ void MainWindow::updateorderCountdowns() {
 		order2CountDown.setHMS(00,ord2mm,ord2ss,0);
 		ui.lcd_time2->display((order2CountDown).toString(QString("mm:ss")));
 		ord2ss--;
+	}
+	else
+	{
+	    ui.lcd_time2->display(QTime(0,0,0,0).toString(QString("hh:mm:ss")));
 	}
 }
 
@@ -296,7 +320,7 @@ void MainWindow::ReadSettings() {
     qnode.order2Needs[2] = 0;
     qnode.order2Needs[3] = 0;
     ui.lcd_order->display(0);
-    std::string state = "STOPPED";
+    std::string state = "Stopped";
     ui.label_state->setText(QString::fromAscii(state.data(),state.size()));
     ui.lcd_up->display(QTime(0,0,0,0).toString(QString("hh:mm:ss")));
     ui.lcd_time1->display(QTime(0,0,0,0).toString(QString("hh:mm:ss")));

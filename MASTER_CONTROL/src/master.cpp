@@ -1,6 +1,7 @@
 // rosnode to send commands to robot
 #include "ros/ros.h"
 #include "std_msgs/String.h"
+#include "std_msgs/Int32.h"
 #include "std_msgs/Int64.h"
 #include "std_msgs/Bool.h"
 #include "MESSAGES/oee.h"
@@ -52,15 +53,14 @@ int calcOEE(double a, double p, double q){
 	return int( (a/100*p/100*q/100)*100 );
 }
 
-void oCompCallback(const std_msgs::Int64::ConstPtr& msg)
+void oCompCallback(const std_msgs::Int32::ConstPtr& msg)
 {
-	if(msg->data>0)
-		ordersCompleted++;
+	ordersCompleted = msg->data;
 }
 
-void oStartCallback(const std_msgs::Int64::ConstPtr& msg)
+void oStartCallback(const std_msgs::Bool::ConstPtr& msg)
 {
-	if(msg->data>0)
+	if(msg->data == true)
 		ordersStarted++;
 }
 
@@ -86,8 +86,8 @@ int main(int argc, char *argv[])
  	ros::Publisher oeePub = h.advertise<MESSAGES::oee>("/oeeInfo", 10);
  	ros::Publisher timePub = h.advertise<std_msgs::Int64>("/time", 1);
  	ros::Publisher packMLPub = h.advertise<std_msgs::Int64>("/packMLState", 10);
- 	ros::Subscriber compSub = h.subscribe("/orderComplete", 10, oCompCallback);
- 	ros::Subscriber staSub = h.subscribe("/orderStarted", 10, oStartCallback);
+ 	ros::Subscriber compSub = h.subscribe("/totalOrders", 10, oCompCallback);
+ 	ros::Subscriber staSub = h.subscribe("/orderBegun", 10, oStartCallback);
  	ros::Subscriber pauSub = h.subscribe("/systemPause", 10, pauseCallback);
 	ros::Rate loop_rate(1);
 
@@ -97,13 +97,15 @@ int main(int argc, char *argv[])
 
 	while (ros::ok())
 	{
-		//ROS_INFO("%f", ros::Time::now().toSec());
+		ROS_INFO("%f", ros::Time::now().toSec());
 
 		plannedTime = ros::Time::now().toSec()+offset;
 		double a = calcAvailability(plannedTime-stallTime,plannedTime);
 		double p = calcPerformance(plannedTime-stallTime);
 		double q = calcQuality();
 		int oee = calcOEE(a,p,q);
+		cout << ordersStarted << endl;
+		cout << ordersCompleted << endl;
 
 		MESSAGES::oee oeeInfo;
 		oeeInfo.availability=int(a);
