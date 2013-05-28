@@ -48,10 +48,13 @@ public Q_SLOTS:
 	void on_pushButton_stop_clicked(bool check);
 	void updateOEE();
 	void updateUpTime();
+	void OrderCountdown();
 	void updateSystemTime();
 	void updateSystemDate();
 	void updateTotalOrders();
 	void updateSystemState(std::string state);
+	void updateorderCountdowns();
+	void updateOrderNeeds();
     /******************************************
     ** Manual connections
     *******************************************/

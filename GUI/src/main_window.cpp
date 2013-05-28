@@ -27,14 +27,16 @@ using namespace Qt;
 
 QTimer *timer = new QTimer();
 QTimer *globalTimer = new QTimer();
-QTime time, currentTime, updateTime;
+QTimer *order1Timer = new QTimer();
+QTimer *order2Timer = new QTimer();
+QTime time, currentTime, updateTime, order1CountDown, order2CountDown;
 QDateTime date;
 bool pause = false;
 bool running = false;
 double timeStamp;
 double pauseTime;
 int secsIterator = 0;
-int hh = 0, mm = 0, ss = 0;
+int hh = 0, mm = 0, ss = 0, ord1mm = 0, ord2mm = 0, ord1ss = 0, ord2ss = 0;
 /*****************************************************************************
 ** Implementation [MainWindow]
 *****************************************************************************/
@@ -50,7 +52,10 @@ MainWindow::MainWindow(int argc, char** argv, QWidget *parent)
 	connect(timer, SIGNAL(timeout()), this, SLOT(updateOEE()));
 	connect(globalTimer, SIGNAL(timeout()), this, SLOT(updateSystemTime()));
 	connect(globalTimer, SIGNAL(timeout()), this, SLOT(updateSystemDate()));
-	connect(globalTimer, SIGNAL(timeout()), this, SLOT(updateSystemState()));
+	connect(globalTimer, SIGNAL(timeout()), this, SLOT(updateSystemState(std::string state)));
+	connect(globalTimer, SIGNAL(timeout()), this, SLOT(OrderCountdown()));
+	connect(globalTimer, SIGNAL(timeout()), this, SLOT(updateorderCountdowns()));
+	connect(timer, SIGNAL(timeout()), this, SLOT(updateOrderNeeds()));
 
 	ReadSettings();
 	setWindowIcon(QIcon(":/images/icon.png"));
@@ -122,6 +127,25 @@ void MainWindow::updateOEE() {
 		ui.lcd_oee->display(OEEData[3]);
 }
 
+void MainWindow::updateOrderNeeds() {
+
+	if(order1Timer->isActive())
+	{
+		int *order1Info = qnode.getOrderNeeds(0);
+		ui.lcd_red1->display(order1Info[0]);
+		ui.lcd_blue1->display(order1Info[1]);
+		ui.lcd_yellow1->display(order1Info[2]);
+	}
+
+	if(order2Timer->isActive())
+	{
+		int *order2Info = qnode.getOrderNeeds(1);
+		ui.lcd_red2->display(order2Info[0]);
+		ui.lcd_blue2->display(order2Info[1]);
+		ui.lcd_yellow2->display(order2Info[2]);
+	}
+}
+
 void MainWindow::updateTotalOrders() {
 	int tmp = 0;
 	qnode.getTotalOrders(tmp);
@@ -155,6 +179,29 @@ void MainWindow::updateUpTime() {
 	ui.lcd_up->display(updateTime.toString());
 }
 
+void MainWindow::OrderCountdown() {
+
+	if(!order1Timer->isActive())
+	{
+		if(qnode.timerStart == 0)
+		{
+			order1Timer->start(1);
+			ord1ss = 0;
+			ord1mm = 3;
+		}
+	}
+
+	if(!order2Timer->isActive())
+	{
+		if(qnode.timerStart == 1)
+		{
+			order2Timer->start(1);
+			ord2ss = 0;
+			ord2mm = 3;
+		}
+	}
+}
+
 void MainWindow::updateSystemState(std::string state) {
 	ui.label_state->setText(QString::fromAscii(state.data(),state.size()));
 	if(state == "STOPPED")
@@ -175,22 +222,51 @@ void MainWindow::updateSystemState(std::string state) {
 		ui.graphics_yellow->setStyleSheet("background-color: white;");
 		ui.graphics_red->setStyleSheet("background-color: white;");
 	}
+}
+
+void MainWindow::updateorderCountdowns() {
 
 
+	if(order1Timer->isActive())
+	{
+		if(ord1ss == 0 && ord1mm == 0)
+		{
+			qnode.timerStart = -1;
+			order1Timer->stop();
+			ui.lcd_time1->display((order1CountDown).toString(QString("00:00:00")));
+		}
+
+		if(ord1ss == 0 && ord1mm > 0)
+		{
+			ord1ss = 59;
+			ord1mm--;
+		}
 
 
-//		QPixmap pixmap("yellow.png");
-//		scene.addPixmap(pixmap);
-//		ui.graphics_yellow->setScene(&scene);
-//		ui.graphics_yellow->show();
+		order1CountDown.setHMS(00,ord1mm,ord1ss,0);
+		ui.lcd_time1->display((order1CountDown).toString(QString("mm:ss")));
+		ord1ss--;
+	}
 
+	if(order2Timer->isActive())
+	{
+		if(ord2ss == 0 && ord2mm == 0)
+		{
+			qnode.timerStart = -1;
+			order2Timer->stop();
+			ui.lcd_time2->display((order2CountDown).toString(QString("00:00:00")));
+		}
 
+		if(ord2ss == 0 && ord2mm > 0)
+		{
+			ord2ss = 59;
+			ord2mm--;
+		}
 
-//		QPixmap pixmap("green.png");
-//		scene.addPixmap(pixmap);
-//		ui.graphics_green->setScene(&scene);
-//		ui.graphics_green->show();
-
+		order2CountDown.setHMS(00,ord2mm,ord2ss,0);
+		ui.lcd_time2->display((order2CountDown).toString(QString("mm:ss")));
+		ord2ss--;
+	}
 }
 
 /*****************************************************************************
@@ -204,10 +280,27 @@ void MainWindow::ReadSettings() {
     updateTime.QTime::fromString(QString("00:00:00"));
     globalTimer->start(1000);
 	date.currentDateTime();
+    qnode.setTotalOrders(0);
+    qnode.timerStart = -1;
+    qnode.newOrder = false;
+    qnode.OEEarray[0] = 0;
+    qnode.OEEarray[1] = 0;
+    qnode.OEEarray[2] = 0;
+    qnode.OEEarray[3] = 0;
+    qnode.order1Needs[0] = 0;
+    qnode.order1Needs[1] = 0;
+    qnode.order1Needs[2] = 0;
+    qnode.order1Needs[3] = 0;
+    qnode.order2Needs[0] = 0;
+    qnode.order2Needs[1] = 0;
+    qnode.order2Needs[2] = 0;
+    qnode.order2Needs[3] = 0;
     ui.lcd_order->display(0);
     std::string state = "STOPPED";
     ui.label_state->setText(QString::fromAscii(state.data(),state.size()));
     ui.lcd_up->display(QTime(0,0,0,0).toString(QString("hh:mm:ss")));
+    ui.lcd_time1->display(QTime(0,0,0,0).toString(QString("hh:mm:ss")));
+    ui.lcd_time2->display(QTime(0,0,0,0).toString(QString("hh:mm:ss")));
     ui.lcd_a->display(0);
     ui.lcd_p->display(0);
     ui.lcd_q->display(0);

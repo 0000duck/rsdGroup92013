@@ -22,10 +22,12 @@
 #include <sstream>
 #include "../include/GUI/qnode.hpp"
 #include "MESSAGES/oee.h"
+#include "MESSAGES/order.h"
 
 /*****************************************************************************
 ** Namespaces
 *****************************************************************************/
+
 
 namespace GUI {
 
@@ -42,6 +44,18 @@ int* QNode::getOEE() {
 	return QNode::OEEarray;
 }
 
+int* QNode::getOrderNeeds(int order) {
+
+	if(order == 0)
+	{
+		return QNode::order1Needs;
+	}
+	else
+	{
+		return QNode::order2Needs;
+	}
+}
+
 void QNode::setTotalOrders(int count) {
 	totalOrdersCount = count;
 }
@@ -53,6 +67,24 @@ void QNode::setOEE(int A, int P, int Q, int OEE) {
 	OEEarray[3] = OEE;
 }
 
+void QNode::setbrickNeeds(int red, int blue, int yellow, int order) {
+
+	if(order == 0)
+	{
+		order1Needs[0] = red;
+		order1Needs[1] = blue;
+		order1Needs[2] = yellow;
+
+	}
+	if(order == 1)
+	{
+		order2Needs[0] = red;
+		order2Needs[1] = blue;
+		order2Needs[2] = yellow;
+	}
+
+}
+
 void QNode::totalOrdersCallback(const std_msgs::Int32::ConstPtr& msg)
 {
 	setTotalOrders(msg->data);
@@ -61,6 +93,23 @@ void QNode::totalOrdersCallback(const std_msgs::Int32::ConstPtr& msg)
 void QNode::getOEECallback(const MESSAGES::oee::ConstPtr& msg)
 {
 	setOEE(msg->availability,msg->performance,msg->quality,msg->oee);
+}
+
+void QNode::newOrderCallback(const std_msgs::Bool::ConstPtr& msg)
+{
+	timerStart = msg->data;
+	newOrder = true;
+}
+
+void QNode::brickNeedsCallback(const MESSAGES::order::ConstPtr& msg)
+{
+	int red = msg->red;
+	int blue = msg->blue;
+	int yellow = msg->yellow;
+	int order = msg->slider;
+
+	std::cout << red << " " << blue << " " << yellow << std::endl;
+	setbrickNeeds(red, blue, yellow, order);
 }
 
 
@@ -86,6 +135,8 @@ bool QNode::init() {
 	ros::start(); // explicitly needed since our nodehandle is going out of scope.
     ros::NodeHandle h;
     TotalOrdersSub = h.subscribe("/totalOrders", 10, &QNode::totalOrdersCallback, this);
+    orderStarted = h.subscribe("/orderBegun", 10, &QNode::newOrderCallback, this);
+    orderNeeds = h.subscribe("/bricksNeeded", 10, &QNode::brickNeedsCallback, this);
     OEESub = h.subscribe("/oeeInfo", 10, &QNode::getOEECallback, this);
     pauseMsg = h.advertise<std_msgs::Bool>("/systemPause", 10);
     lightState = h.advertise<std_msgs::Int8>("/lightState", 10);

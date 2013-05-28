@@ -36,10 +36,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/rsd/workspace/RSD09/GUI
+CMAKE_SOURCE_DIR = /home/jesper/RSD-git/RSD_ROS/rsdGroup92013/GUI
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/rsd/workspace/RSD09/GUI
+CMAKE_BINARY_DIR = /home/jesper/RSD-git/RSD_ROS/rsdGroup92013/GUI
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -107,9 +107,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/rsd/workspace/RSD09/GUI/CMakeFiles /home/rsd/workspace/RSD09/GUI/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/jesper/RSD-git/RSD_ROS/rsdGroup92013/GUI/CMakeFiles /home/jesper/RSD-git/RSD_ROS/rsdGroup92013/GUI/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/rsd/workspace/RSD09/GUI/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/jesper/RSD-git/RSD_ROS/rsdGroup92013/GUI/CMakeFiles 0
 .PHONY : all
 
 # The main clean target

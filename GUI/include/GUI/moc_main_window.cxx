@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'main_window.hpp'
 **
-** Created: Sat May 25 15:49:41 2013
+** Created: Mon May 27 21:20:07 2013
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.1)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -23,7 +23,7 @@ static const uint qt_meta_data_GUI__MainWindow[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-       9,   14, // methods
+      12,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -37,9 +37,12 @@ static const uint qt_meta_data_GUI__MainWindow[] = {
      124,   16,   16,   16, 0x0a,
      136,   16,   16,   16, 0x0a,
      151,   16,   16,   16, 0x0a,
-     170,   16,   16,   16, 0x0a,
-     189,   16,   16,   16, 0x0a,
-     215,  209,   16,   16, 0x0a,
+     168,   16,   16,   16, 0x0a,
+     187,   16,   16,   16, 0x0a,
+     206,   16,   16,   16, 0x0a,
+     232,  226,   16,   16, 0x0a,
+     263,   16,   16,   16, 0x0a,
+     287,   16,   16,   16, 0x0a,
 
        0        // eod
 };
@@ -49,10 +52,11 @@ static const char qt_meta_stringdata_GUI__MainWindow[] = {
     "on_pushButton_pause_clicked(bool)\0"
     "on_pushButton_start_clicked(bool)\0"
     "on_pushButton_stop_clicked(bool)\0"
-    "updateOEE()\0updateUpTime()\0"
+    "updateOEE()\0updateUpTime()\0OrderCountdown()\0"
     "updateSystemTime()\0updateSystemDate()\0"
     "updateTotalOrders()\0state\0"
     "updateSystemState(std::string)\0"
+    "updateorderCountdowns()\0updateOrderNeeds()\0"
 };
 
 void GUI::MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -66,10 +70,13 @@ void GUI::MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int 
         case 2: _t->on_pushButton_stop_clicked((*reinterpret_cast< bool(*)>(_a[1]))); break;
         case 3: _t->updateOEE(); break;
         case 4: _t->updateUpTime(); break;
-        case 5: _t->updateSystemTime(); break;
-        case 6: _t->updateSystemDate(); break;
-        case 7: _t->updateTotalOrders(); break;
-        case 8: _t->updateSystemState((*reinterpret_cast< std::string(*)>(_a[1]))); break;
+        case 5: _t->OrderCountdown(); break;
+        case 6: _t->updateSystemTime(); break;
+        case 7: _t->updateSystemDate(); break;
+        case 8: _t->updateTotalOrders(); break;
+        case 9: _t->updateSystemState((*reinterpret_cast< std::string(*)>(_a[1]))); break;
+        case 10: _t->updateorderCountdowns(); break;
+        case 11: _t->updateOrderNeeds(); break;
         default: ;
         }
     }
@@ -107,9 +114,9 @@ int GUI::MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 9)
+        if (_id < 12)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 9;
+        _id -= 12;
     }
     return _id;
 }

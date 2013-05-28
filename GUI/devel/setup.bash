@@ -2,4 +2,4 @@
 # generated from catkin/cmake/templates/setup.bash.in
 
 CATKIN_SHELL=bash
-. "/home/rsd/workspace/RSD09/GUI/devel/setup.sh"
+. "/home/jesper/RSD-git/RSD_ROS/rsdGroup92013/GUI/devel/setup.sh"
